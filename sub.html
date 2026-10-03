@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<style id="zex-base-styles">
+  .ud-glass {
+    background: rgba(15, 20, 35, 0.6) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(242, 183, 5, 0.15) !important;
+    border-radius: 20px !important;
+    padding: 20px !important;
+    margin-bottom: 14px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+  }
+  .ud-head {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+  }
+  .ud-cfg {
+    margin-bottom: 14px !important;
+  }
+  .ud-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+  .ud-btnrow {
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+  }
+  .ud-btn {
+    flex: 1 !important;
+    padding: 10px !important;
+    border-radius: 8px !important;
+    border: 1px solid #212942 !important;
+    background: #131829 !important;
+    color: #eef1f8 !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+  }
+  .ud-btn-gold {
+    background: #f2b705 !important;
+    color: #1a1204 !important;
+    border: none !important;
+  }
+  * {
+    box-sizing: border-box !important;
+  }
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #0a0e1a !important;
+    color: #eef1f8 !important;
+    font-family: 'Segoe UI', Tahoma, sans-serif !important;
+  }
+  h2, h3 {
+    margin: 0 0 10px 0 !important;
+    color: #eef1f8 !important;
+  }
+</style>
+
+<style id="zex-login-style">
+  body {
+    background: #0a0e1a !important;
+    margin: 0;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+  }
+
+  h1, h2 {
+    color: #f2b705 !important;
+    text-align: center !important;
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    margin: 30px 0 !important;
+  }
+
+  form, .login-form {
+    background: rgba(15, 20, 35, 0.6) !important;
+    border: 1px solid rgba(242, 183, 5, 0.15) !important;
+    border-radius: 20px !important;
+    padding: 30px 25px !important;
+    max-width: 420px !important;
+    margin: 0 auto !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  label {
+    color: #8892ab !important;
+    font-size: 14px !important;
+    display: block !important;
+    margin-bottom: 8px !important;
+    margin-top: 16px !important;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100% !important;
+    padding: 16px !important;
+    background: rgba(10, 14, 26, 0.8) !important;
+    border: 2px solid #212942 !important;
+    border-radius: 12px !important;
+    color: #eef1f8 !important;
+    font-size: 16px !important;
+    box-sizing: border-box !important;
+    transition: all 0.3s ease !important;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus {
+    border-color: #f2b705 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(242, 183, 5, 0.1) !important;
+  }
+
+  button[type="submit"],
+  .login-btn,
+  input[type="submit"] {
+    width: 100% !important;
+    padding: 18px !important;
+    background: linear-gradient(135deg, #f2b705, #f59e0b) !important;
+    border: none !important;
+    border-radius: 14px !important;
+    color: #1a1204 !important;
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+    margin-top: 24px !important;
+    box-shadow: 0 8px 20px rgba(242, 183, 5, 0.3) !important;
+    transition: transform 0.2s ease !important;
+  }
+
+  button[type="submit"]:active,
+  .login-btn:active,
+  input[type="submit"]:active {
+    transform: scale(0.97) !important;
+  }
+
+  .checkbox-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    color: #8892ab !important;
+    font-size: 13px !important;
+    margin-top: 16px !important;
+    justify-content: flex-end !important;
+  }
+
+  input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    accent-color: #f2b705 !important;
+  }
+</style>
+
+
+
+<style>
+body.login-body {
+  background: linear-gradient(-45deg, #0a0e1a, #1a1f3a, #0f1429, #161b33);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.login-card {
+  background: rgba(20, 25, 45, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(242, 183, 5, 0.2);
+  border-radius: 24px;
+  padding: 40px 30px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: fadeInUp 0.8s ease-out;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>داشبورد کاربر | زئوس</title>
+<link rel="manifest" href="/assets/manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<meta name="theme-color" content="#090c14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="/assets/mobile-login.css?v=1">
+</head>
+<body>
+<div id="udContent" style="padding:20px;max-width:800px;margin:0 auto"></div>
+<div id="udRoot"></div>
+<script src="/assets/chart.umd.min.js"></script>
+<script src="/assets/zfx.js?v=16"></script>
+<script src="/assets/user-dashboard.js?v=3000"></script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/assets/sw-app.js").catch(function(){});});}</script>
+<script src="/assets/ticket-user.js?v=1"></script>
+<script src="/assets/sub-buttons.js?v=1"></script>
+<script src="/assets/renewal-user.js?v=2"></script>
+<script src="/assets/bottom-nav.js?v=3000"></script>
+<script src="/assets/mobile-login.js?v=3000"></script>
+<script src="/assets/notifications-ui.js?v=3100"></script>
+<script src="/assets/pwa-install.js?v=1"></script>
+</body>
+</html>

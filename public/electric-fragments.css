@@ -1,0 +1,44 @@
+.electric-overlay{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:0;
+  opacity:.72;
+}
+
+body > *:not(.electric-overlay):not(.modal):not(.toasts):not(.full-loader):not(.zeus-weather){
+  position:relative;
+  z-index:1;
+}
+
+.electric-fragment{
+  position:absolute;
+  top:-12vh;
+  left:-8vw;
+  width:var(--fragment-width, 12px);
+  height:var(--fragment-height, 28px);
+  background:linear-gradient(180deg, transparent 0%, #f2b705 35%, #fff4b0 52%, transparent 100%);
+  clip-path:polygon(45% 0, 100% 0, 62% 37%, 92% 37%, 25% 100%, 42% 54%, 8% 54%);
+  filter:drop-shadow(0 0 5px #f2b705);
+  opacity:0;
+  transform:translate3d(0, 0, 0) rotate(var(--fragment-rotate, 18deg));
+  animation:electric-fragment-fall var(--fragment-duration, 7s) linear var(--fragment-delay, 0s) infinite;
+}
+
+@keyframes electric-fragment-fall{
+  0%{
+    opacity:0;
+    transform:translate3d(var(--fragment-start-x, 0vw), -14vh, 0) rotate(var(--fragment-rotate, 18deg)) scale(.7);
+  }
+  12%{ opacity:.85; }
+  68%{ opacity:.4; }
+  100%{
+    opacity:0;
+    transform:translate3d(var(--fragment-end-x, 34vw), 118vh, 0) rotate(calc(var(--fragment-rotate, 18deg) + 180deg)) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .electric-overlay{ display:none; }
+}

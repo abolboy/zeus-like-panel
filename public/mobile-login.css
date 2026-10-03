@@ -1,0 +1,183 @@
+/* پس‌زمینه گرادیانت متحرک */
+body.login-body {
+  background: linear-gradient(-45deg, #0a0e1a, #1a1f3a, #0f1429, #161b33);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* کارت ورود شیشه‌ای */
+.login-card {
+  background: rgba(20, 25, 45, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(242, 183, 5, 0.2);
+  border-radius: 24px;
+  padding: 40px 30px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(242, 183, 5, 0.1);
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* لوگوی متحرک */
+.login-logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-logo .logo-icon {
+  font-size: 60px;
+  display: inline-block;
+  animation: pulse 2s infinite;
+  filter: drop-shadow(0 0 20px rgba(242, 183, 5, 0.6));
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.login-logo h1 {
+  color: #f2b705;
+  font-size: 28px;
+  margin: 10px 0 5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.login-logo p {
+  color: #8892ab;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* فیلدهای ورودی */
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 16px 16px 16px 50px;
+  background: rgba(10, 14, 26, 0.6);
+  border: 2px solid #212942;
+  border-radius: 14px;
+  color: #eef1f8;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #f2b705;
+  background: rgba(10, 14, 26, 0.8);
+  box-shadow: 0 0 0 4px rgba(242, 183, 5, 0.1);
+}
+
+.input-group .input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #8892ab;
+  transition: color 0.3s ease;
+}
+
+.input-group input:focus + .input-icon,
+.input-group input:not(:placeholder-shown) + .input-icon {
+  color: #f2b705;
+}
+
+/* دکمه ورود با افکت Ripple */
+.login-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #f2b705, #f59e0b);
+  border: none;
+  border-radius: 14px;
+  color: #1a1204;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 20px rgba(242, 183, 5, 0.3);
+}
+
+.login-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 10px rgba(242, 183, 5, 0.2);
+}
+
+.login-btn .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* پیام خطا */
+.login-error {
+  background: rgba(255, 92, 114, 0.1);
+  border: 1px solid #ff5c72;
+  color: #ff8fa0;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+  display: none;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* لینک فراموشی رمز */
+.login-forgot {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.login-forgot a {
+  color: #8892ab;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.login-forgot a:hover {
+  color: #f2b705;
+}

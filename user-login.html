@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<style id="zex-mobile-login">
+body {
+  background: linear-gradient(-45deg, #0a0e1a, #1a1f3a, #0f1429, #161b33) !important;
+  background-size: 400% 400% !important;
+  animation: zexGradientBG 15s ease infinite !important;
+}
+@keyframes zexGradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.login-card, form {
+  background: rgba(20, 25, 45, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(242, 183, 5, 0.2) !important;
+  border-radius: 24px !important;
+  padding: 40px 30px !important;
+  max-width: 400px !important;
+  margin: 0 auto !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(242, 183, 5, 0.1) !important;
+  animation: zexFadeInUp 0.8s ease-out !important;
+}
+@keyframes zexFadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+input[type="text"], input[type="password"] {
+  background: rgba(10, 14, 26, 0.6) !important;
+  border: 2px solid #212942 !important;
+  border-radius: 14px !important;
+  color: #eef1f8 !important;
+  padding: 16px !important;
+  font-size: 16px !important;
+  transition: all 0.3s ease !important;
+}
+input[type="text"]:focus, input[type="password"]:focus {
+  border-color: #f2b705 !important;
+  background: rgba(10, 14, 26, 0.8) !important;
+  box-shadow: 0 0 0 4px rgba(242, 183, 5, 0.1) !important;
+  outline: none !important;
+}
+button[type="submit"], .login-btn {
+  background: linear-gradient(135deg, #f2b705, #f59e0b) !important;
+  border: none !important;
+  border-radius: 14px !important;
+  color: #1a1204 !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  padding: 16px !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  box-shadow: 0 8px 20px rgba(242, 183, 5, 0.3) !important;
+  transition: transform 0.2s ease !important;
+}
+button[type="submit"]:active, .login-btn:active {
+  transform: scale(0.98) !important;
+}
+h1, h2 {
+  color: #f2b705 !important;
+  text-align: center !important;
+  font-weight: 800 !important;
+}
+</style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ورود کاربران | Zeus Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/electric-fragments.css?v=9">
+<style>
+  :root{
+    --bg:#0a0c14; --panel:#0f1220; --panel-2:#141830; --border:#232a48;
+    --text:#eef0fa; --muted:#8b90b3; --violet:#8b7bff; --violet-soft:#8b7bff22;
+    --danger:#ff5c72; --danger-soft:#ff5c7220; --success:#35d68f;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.001s !important; }
+  }
+  body{
+    font-family:'Vazirmatn', system-ui, sans-serif;
+    background:var(--bg); color:var(--text);
+    display:flex; min-height:100vh; overflow-x:hidden;
+  }
+  .stage{
+    flex:1 1 46%; position:relative; display:flex; flex-direction:column;
+    justify-content:space-between; padding:56px 48px;
+    background:
+      radial-gradient(circle at 70% 25%, #8b7bff18 0%, transparent 55%),
+      radial-gradient(circle at 20% 85%, #8b7bff0c 0%, transparent 50%),
+      linear-gradient(165deg, #10122a 0%, #0a0c14 70%);
+    background-size:140% 140%, 140% 140%, 100% 100%;
+    animation: driftBg 18s ease-in-out infinite alternate;
+    border-left:1px solid var(--border);
+    overflow:hidden;
+  }
+  @keyframes driftBg{
+    0%{ background-position: 70% 10%, 10% 90%, 0 0; }
+    100%{ background-position: 50% 35%, 30% 70%, 0 0; }
+  }
+
+  .stage-mark{ display:flex; align-items:center; gap:12px; opacity:0; animation:riseIn .6s ease-out .1s forwards; }
+  .stage-mark span{ font-size:15px; letter-spacing:.04em; color:var(--muted); font-weight:500; }
+
+  .sparks{ position:absolute; top:0; right:0; bottom:0; left:0; pointer-events:none; }
+  .spark{
+    position:absolute; width:3px; height:3px; border-radius:50%; background:#8b7bff;
+    box-shadow:0 0 6px 1px #8b7bff90; opacity:0; animation:floatSpark linear infinite;
+  }
+  @keyframes floatSpark{
+    0%{ transform:translateY(0) translateX(0); opacity:0; }
+    10%{ opacity:.9; } 90%{ opacity:.5; }
+    100%{ transform:translateY(-140px) translateX(var(--dx, 20px)); opacity:0; }
+  }
+
+  .orbit{ position:absolute; top:0; right:0; bottom:0; left:0; display:flex; align-items:center; justify-content:center; }
+  .orbit svg{ width:min(520px, 80%); height:auto; opacity:0; animation:riseIn .8s ease-out .2s forwards; }
+  .wave{ fill:none; stroke:#8b7bff30; stroke-width:1.4; }
+  .wave.a{ animation:pulse 4.5s ease-in-out infinite; }
+  .wave.b{ animation:pulse 4.5s ease-in-out .5s infinite; }
+  .wave.c{ animation:pulse 4.5s ease-in-out 1s infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:.25; transform:scale(1); } 50%{ opacity:.7; transform:scale(1.03); } }
+
+  .bolt{ animation:charge 2.6s ease-in-out .2s 1, breathe 4.5s ease-in-out 3s infinite; transform-origin:center; }
+  @keyframes charge{
+    0%{ opacity:0; filter:drop-shadow(0 0 0px #8b7bff); transform:scale(.9); }
+    45%{ opacity:1; filter:drop-shadow(0 0 20px #8b7bff90); transform:scale(1.02); }
+    100%{ opacity:1; filter:drop-shadow(0 0 8px #8b7bff55); transform:scale(1); }
+  }
+  @keyframes breathe{
+    0%,100%{ filter:drop-shadow(0 0 8px #8b7bff55); }
+    50%{ filter:drop-shadow(0 0 16px #8b7bff85); }
+  }
+
+  .stage-copy{ position:relative; z-index:1; max-width:380px; opacity:0; animation:riseIn .6s ease-out .35s forwards; }
+  .stage-copy h1{ font-size:34px; font-weight:900; line-height:1.35; letter-spacing:-.01em; }
+  .stage-copy h1 em{ color:var(--violet); font-style:normal; }
+  .stage-copy p{ margin-top:14px; color:var(--muted); font-size:14.5px; line-height:1.9; }
+
+  .stage-foot{ position:relative; z-index:1; display:flex; gap:28px; opacity:0; animation:riseIn .6s ease-out .45s forwards; }
+  .stage-foot div{ font-size:12px; color:var(--muted); }
+  .stage-foot b{ display:block; font-size:18px; color:var(--text); font-weight:700; margin-bottom:2px; }
+
+  @keyframes riseIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+
+  .form-side{ flex:1 1 54%; display:flex; align-items:center; justify-content:center; padding:40px 24px; }
+  .form-wrap{ width:100%; max-width:380px; }
+  .form-wrap .eyebrow{ font-size:13px; color:var(--muted); margin-bottom:6px; opacity:0; animation:riseIn .5s ease-out .15s forwards; }
+  .form-wrap h2{ font-size:26px; font-weight:700; margin-bottom:32px; opacity:0; animation:riseIn .5s ease-out .22s forwards; }
+
+  .field{ margin-bottom:18px; opacity:0; animation:riseIn .5s ease-out forwards; }
+  #fUsername{ animation-delay:.3s; }
+  #fPassword{ animation-delay:.37s; }
+  .field label{ display:block; font-size:13px; color:var(--muted); margin-bottom:8px; transition:color .15s; }
+  .field .box{ position:relative; }
+  .field .box::after{
+    content:''; position:absolute; right:0; bottom:0; left:0; height:2px; border-radius:2px;
+    background:var(--violet); transform:scaleX(0); transform-origin:center; transition:transform .25s ease;
+  }
+  .field.focused .box::after{ transform:scaleX(1); }
+  .field.focused label{ color:var(--violet); }
+
+  .field input{
+    width:100%; padding:14px 16px; background:var(--panel-2); border:1px solid var(--border);
+    border-radius:10px; color:var(--text); font-size:14.5px; font-family:inherit; outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .field input::placeholder{ color:#4d5480; }
+  .field input:focus{ border-color:var(--violet); box-shadow:0 0 0 3px var(--violet-soft); }
+  .field.err input{ border-color:var(--danger); box-shadow:0 0 0 3px var(--danger-soft); animation:shake .35s; }
+  @keyframes shake{ 0%,100%{ transform:translateX(0); } 25%{ transform:translateX(-5px); } 75%{ transform:translateX(5px); } }
+
+  .toggle-eye{
+    position:absolute; inset-inline-start:12px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; color:var(--muted); padding:4px; display:flex; transition:color .15s;
+  }
+  .toggle-eye:hover{ color:var(--violet); }
+  .field input[data-pw]{ padding-inline-start:42px; }
+
+  .caps-warn{ display:none; align-items:center; gap:6px; font-size:12px; color:#c9b8ff; margin-top:8px; }
+  .caps-warn.show{ display:flex; }
+
+  button.submit{
+    width:100%; padding:14px; border:none; border-radius:10px; font-family:inherit;
+    background:var(--violet); color:#0e0a2c; font-size:15px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px; margin-top:6px;
+    transition:filter .15s, transform .05s; position:relative; overflow:hidden;
+    opacity:0; animation:riseIn .5s ease-out .5s forwards;
+  }
+  button.submit::before{
+    content:''; position:absolute; top:0; right:0; bottom:0; left:0; background:linear-gradient(120deg, transparent 30%, #ffffff55 50%, transparent 70%);
+    transform:translateX(-120%); transition:transform .6s ease;
+  }
+  button.submit:hover::before{ transform:translateX(120%); }
+  button.submit:hover{ filter:brightness(1.1); }
+  button.submit:active{ transform:scale(.99); }
+  button.submit:disabled{ opacity:.85; cursor:default; }
+
+  .spinner{
+    width:16px; height:16px; border-radius:50%; border:2px solid #0e0a2c40; border-top-color:#0e0a2c;
+    animation:spin .7s linear infinite; display:none;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  button.submit.loading .spinner{ display:inline-block; }
+  button.submit.loading .btn-text{ display:none; }
+
+  button.submit.success{ background:var(--success); }
+  .check{ display:none; }
+  button.submit.success .check{ display:inline-block; animation:popIn .3s ease; }
+  button.submit.success .spinner,
+  button.submit.success .btn-text{ display:none; }
+  @keyframes popIn{ from{ transform:scale(.4); opacity:0; } to{ transform:scale(1); opacity:1; } }
+
+  .alert{
+    display:none; margin-top:18px; padding:12px 14px; border-radius:10px;
+    background:var(--danger-soft); border:1px solid #ff5c7245; color:#ffb3c0; font-size:13.5px;
+    line-height:1.7; align-items:flex-start; gap:8px;
+  }
+  .alert.show{ display:flex; animation:riseIn .3s ease; }
+
+  .row-between{ opacity:0; animation:riseIn .5s ease-out .44s forwards; }
+
+  .admin-link{ margin-top:26px; text-align:center; font-size:13px; color:var(--muted);
+    opacity:0; animation:riseIn .5s ease-out .55s forwards; }
+  .admin-link a{ color:var(--violet); text-decoration:none; font-weight:600; }
+  .admin-link a:hover{ text-decoration:underline; }
+
+  @media (max-width: 860px){
+    .stage{ display:none; }
+    .form-side{ padding:32px 20px; }
+  }
+</style>
+
+<style id="user-login-layout-fix">
+  .form-side,
+  .form-wrap{
+    direction:rtl !important;
+  }
+
+  @media (min-width:861px){
+    .form-side{
+      justify-content:center !important;
+      padding:40px clamp(72px, 10vw, 160px) 40px 24px !important;
+    }
+
+    .form-wrap{
+      width:100% !important;
+      max-width:380px !important;
+      margin-inline:auto !important;
+      transform:none !important;
+    }
+  }
+
+  @media (max-width:860px){
+    .form-side{
+      width:100% !important;
+      padding:32px 20px !important;
+      justify-content:center !important;
+    }
+
+    .form-wrap{
+      width:100% !important;
+      max-width:380px !important;
+      margin-inline:auto !important;
+      transform:none !important;
+    }
+  }
+</style>
+
+
+
+
+
+
+<style id="white-star-snow-fix">
+  .zeus-flake{
+    background:#ffffff !important;
+    background-color:#ffffff !important;
+    border-radius:50% !important;
+    clip-path:none !important;
+    box-shadow:none !important;
+    filter:none !important;
+    animation-name:zeusNaturalSnow !important;
+  }
+
+  @keyframes zeusNaturalSnow{
+    0%{
+      transform:translate3d(0,0,0);
+      opacity:0;
+    }
+    12%{
+      opacity:.92;
+    }
+    50%{
+      transform:translate3d(calc(var(--drift) * .45),58vh,0);
+      opacity:.92;
+    }
+    88%{
+      opacity:.72;
+    }
+    100%{
+      transform:translate3d(var(--drift),115vh,0);
+      opacity:0;
+    }
+  }
+</style>
+
+<link rel="stylesheet" href="/assets/mobile-login.css?v=1">
+</head>
+<body>
+
+  <section class="stage">
+    <div class="sparks" id="sparks"></div>
+
+    <div class="stage-mark">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-2 8 9-12h-6l2-8Z" fill="#8b7bff"/></svg>
+      <span>ZEUS PANEL · پنل کاربری</span>
+    </div>
+
+    <div class="orbit">
+      <svg viewBox="0 0 400 400">
+        <ellipse class="wave a" cx="200" cy="200" rx="170" ry="90"/>
+        <ellipse class="wave b" cx="200" cy="200" rx="170" ry="90" transform="rotate(60 200 200)"/>
+        <ellipse class="wave c" cx="200" cy="200" rx="170" ry="90" transform="rotate(120 200 200)"/>
+        <g class="bolt">
+          <path d="M215 90 130 220h55l-20 90 105-140h-60l20-80Z" fill="#8b7bff"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="stage-copy">
+      <h1>اشتراک شما، <em>همیشه در دسترس</em></h1>
+      <p>وضعیت حجم مصرفی، تاریخ انقضا و کانفیگ‌های اتصال خود را با یک ورود ساده مشاهده کنید.</p>
+    </div>
+
+    <div class="stage-foot">
+      <div id="quickQR" style="cursor:pointer"><b>QR</b>اتصال سریع</div>
+      <div><b>لحظه‌ای</b>وضعیت مصرف</div>
+      <div><b>یک‌کلیک</b>کپی کانفیگ</div>
+    </div>
+  </section>
+
+  <section class="form-side">
+    <div class="form-wrap">
+      <div class="eyebrow">ورود کاربران</div>
+      <h2>مشاهده‌ی اشتراک من</h2>
+
+      <form id="userLoginForm" novalidate>
+        <div class="field" id="fUsername">
+          <label for="username">نام کاربری</label>
+          <div class="box">
+            <input type="text" id="username" autocomplete="username" placeholder="نام کاربری اشتراک" autofocus required>
+          </div>
+        </div>
+
+        <div class="field" id="fPassword">
+          <label for="password">رمز عبور</label>
+          <div class="box">
+            <button type="button" class="toggle-eye" id="eyeBtn" tabindex="-1" aria-label="نمایش رمز عبور" aria-pressed="false">
+              <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+            <input type="password" data-pw id="password" autocomplete="current-password" placeholder="••••••••" required>
+          </div>
+          <div class="caps-warn" id="capsWarn">⇧ کلید Caps Lock فعال است</div>
+        </div>
+
+        <div class="row-between">
+          <label for="remember" style="font-size:13px; color:var(--muted); display:flex; align-items:center; gap:7px; cursor:pointer; margin:-6px 0 6px;">
+            <input type="checkbox" id="remember" checked style="accent-color:var(--violet); width:15px; height:15px;"> مرا به‌خاطر بسپار
+          </label>
+        </div>
+
+        <button type="submit" class="submit" id="submitBtn">
+          <span class="spinner"></span>
+          <svg class="check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d2b1c" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg>
+          <span class="btn-text">ورود و مشاهده‌ی اشتراک</span>
+        </button>
+
+        <div class="alert" id="errBox" role="alert" aria-live="assertive">
+          <span>⚠</span>
+          <span style="flex:1">
+            <span id="errText"></span>
+            <button type="button" id="renewFromLoginBtn" style="display:none; margin-top:10px; width:100%; padding:9px; border:none; border-radius:8px; background:var(--violet); color:#0e0a2c; font-weight:700; font-size:12.5px; cursor:pointer;">🔄 درخواست تمدید</button>
+          </span>
+        </div>
+      </form>
+
+
+    </div>
+  </section>
+
+<script>
+  const sparksEl = document.getElementById('sparks');
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('div');
+    s.className = 'spark';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.bottom = (Math.random() * 60) + 'px';
+    s.style.setProperty('--dx', (Math.random() * 40 - 20) + 'px');
+    s.style.animationDuration = (5 + Math.random() * 6) + 's';
+    s.style.animationDelay = (Math.random() * 8) + 's';
+    sparksEl.appendChild(s);
+  }
+
+  const form = document.getElementById('userLoginForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const errBox = document.getElementById('errBox');
+  const errText = document.getElementById('errText');
+  const eyeBtn = document.getElementById('eyeBtn');
+  const pwInput = document.getElementById('password');
+  const userInput = document.getElementById('username');
+  const capsWarn = document.getElementById('capsWarn');
+
+  const eyeIcon = document.getElementById('eyeIcon');
+  const EYE_OPEN = '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+  const EYE_OFF = '<path d="M3 3l18 18"/><path d="M10.6 5.2A9.9 9.9 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.3 4.2M6.5 6.6C4 8.3 2 12 2 12s3.6 7 10 7c1.3 0 2.5-.2 3.6-.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>';
+  eyeBtn.addEventListener('click', () => {
+    const showing = pwInput.type === 'password';
+    pwInput.type = showing ? 'text' : 'password';
+    eyeIcon.innerHTML = showing ? EYE_OFF : EYE_OPEN;
+    eyeBtn.setAttribute('aria-pressed', String(showing));
+    eyeBtn.setAttribute('aria-label', showing ? 'پنهان کردن رمز عبور' : 'نمایش رمز عبور');
+  });
+
+  [userInput, pwInput].forEach(inp => {
+    const field = inp.closest('.field');
+    inp.addEventListener('focus', () => field.classList.add('focused'));
+    inp.addEventListener('blur', () => field.classList.remove('focused'));
+  });
+
+  pwInput.addEventListener('keyup', (e) => {
+    const on = e.getModifierState && e.getModifierState('CapsLock');
+    capsWarn.classList.toggle('show', !!on);
+  });
+
+  function showError(msg, showRenewBtn){
+    errText.textContent = msg;
+    errBox.classList.add('show');
+    userInput.setAttribute('aria-invalid', 'true');
+    pwInput.setAttribute('aria-invalid', 'true');
+    document.getElementById('fUsername').classList.add('err');
+    document.getElementById('fPassword').classList.add('err');
+    setTimeout(() => {
+      document.getElementById('fUsername').classList.remove('err');
+      document.getElementById('fPassword').classList.remove('err');
+    }, 400);
+
+    const renewBtn = document.getElementById('renewFromLoginBtn');
+    renewBtn.style.display = showRenewBtn ? 'block' : 'none';
+  }
+  function clearError(){
+    errBox.classList.remove('show');
+    document.getElementById('renewFromLoginBtn').style.display = 'none';
+  }
+
+  document.getElementById('renewFromLoginBtn').addEventListener('click', async () => {
+    const renewBtn = document.getElementById('renewFromLoginBtn');
+    renewBtn.disabled = true;
+    renewBtn.textContent = 'در حال ارسال...';
+    try {
+      const r = await fetch('/api/request-renewal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: userInput.value.trim(), password: pwInput.value })
+      });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok) {
+        renewBtn.textContent = '✅ درخواست شما ثبت شد';
+        errText.textContent = 'درخواست تمدید شما ثبت شد. پس از تأیید مدیر می‌توانید وارد شوید.';
+      } else {
+        renewBtn.disabled = false;
+        renewBtn.textContent = '🔄 درخواست تمدید';
+        alert(d.error || 'خطا در ثبت درخواست');
+      }
+    } catch {
+      renewBtn.disabled = false;
+      renewBtn.textContent = '🔄 درخواست تمدید';
+      alert('ارتباط با سرور برقرار نشد.');
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+
+    const username = userInput.value.trim();
+    const password = pwInput.value;
+    if (!username || !password) { showError('نام کاربری و رمز عبور را وارد کنید.'); return; }
+
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    try {
+      const res = await fetch('/api/user-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, rememberMe: document.getElementById('remember').checked })
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && (data.success || data.ok)) {
+        submitBtn.classList.remove('loading');
+        submitBtn.classList.add('success');
+        setTimeout(() => {
+          const __target = '/sub/' + encodeURIComponent(data.username || username); if (window.SPA_NAV) { window.SPA_NAV(__target); } else { window.location.href = __target; }
+        }, 500);
+        return;
+      }
+      if (data.expired) {
+        if (data.renewalRequested) {
+          showError('اشتراک شما منقضی شده و درخواست تمدید قبلی‌تان در انتظار بررسی است.', false);
+        } else {
+          showError(data.error || 'اشتراک شما منقضی شده است.', true);
+        }
+      } else {
+        showError(data.error || data.message || 'نام کاربری یا رمز عبور اشتباه است.');
+      }
+    } catch {
+      showError('ارتباط با سرور برقرار نشد. اتصال شبکه را بررسی کنید.');
+    } finally {
+      if (!submitBtn.classList.contains('success')) {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    }
+  });
+</script>
+<script src="/assets/zfx.js?v=16"></script>
+
+
+<style>
+    .zeus-weather{ position:fixed; top:0; right:0; bottom:0; left:0; pointer-events:none; overflow:hidden; z-index:10; opacity:1; visibility:visible; }
+  .zeus-snow-layer, .zeus-fire-layer{ position:absolute; top:0; right:0; bottom:0; left:0; }
+  .zeus-flake,   .zeus-ember{ position:absolute; top:-8%; border-radius:50%; background:radial-gradient(circle,rgba(255,235,120,1),rgba(255,125,15,.98) 48%,rgba(255,52,0,.8)); box-shadow:0 0 18px 6px rgba(255,138,37,.95), 0 0 34px 10px rgba(255,73,0,.35); animation:zeusFall linear infinite; }
+    .zeus-flake{ position:absolute; top:-8%; border-radius:50%; background:rgba(234,243,255,.96); box-shadow:0 0 14px 5px rgba(188,217,255,.9), 0 0 28px 8px rgba(150,195,255,.3); animation:zeusFall linear infinite; }
+  .zeus-ember{ position:absolute; top:-8%; border-radius:50%; background:radial-gradient(circle,#ffd24d,#ff5c00); box-shadow:0 0 14px 4px #ff8a25a0; animation:zeusFall linear infinite; }
+  @keyframes zeusFall{
+    0%{ transform:translateY(0) translateX(0); opacity:.98; }
+    6%{ opacity:1; }
+    94%{ opacity:1; }
+    100%{ transform:translateY(120vh) translateX(var(--drift, 20px)); opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){ .zeus-weather{ opacity:.98; } }
+</style>
+<div class="zeus-weather" aria-hidden="true">
+  <div class="zeus-snow-layer" id="zeusSnow"></div>
+  <div class="zeus-fire-layer" id="zeusFire"></div>
+</div>
+<script>
+(function(){
+  const snow = document.getElementById('zeusSnow');
+  const fire = document.getElementById('zeusFire');
+  if (!snow || !fire) return;
+  for (let i = 0; i < 30; i++){
+    const f = document.createElement('div');
+    f.className = 'zeus-flake';
+    const size = 9 + Math.random() * 10;
+    f.style.width = f.style.height = size + 'px';
+    f.style.right = (Math.random() * 90) + '%';
+    f.style.setProperty('--drift', (Math.random() * 50 - 25) + 'px');
+    f.style.animationDuration = (6 + Math.random() * 7) + 's';
+    f.style.animationDelay = -(Math.random() * 7) + 's';
+    snow.appendChild(f);
+  }
+  for (let i = 0; i < 24; i++){
+    const e = document.createElement('div');
+    e.className = 'zeus-ember';
+    const size = 7 + Math.random() * 9;
+    e.style.width = e.style.height = size + 'px';
+    e.style.left = (Math.random() * 90) + '%';
+    e.style.setProperty('--drift', (Math.random() * 40 - 20) + 'px');
+    e.style.animationDuration = (5 + Math.random() * 6) + 's';
+    e.style.animationDelay = -(Math.random() * 6) + 's';
+    fire.appendChild(e);
+  }
+})();
+</script>
+
+
+
+
+
+<style id="zeus-effects-override">
+.zeus-weather{
+  position:fixed !important;
+  top:0 !important; right:0 !important; bottom:0 !important; left:0 !important;
+  z-index:999 !important;
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  pointer-events:none !important;
+  overflow:hidden !important;
+}
+
+.zeus-snow-layer,
+.zeus-fire-layer{
+  position:absolute !important;
+  top:0 !important; right:0 !important; bottom:0 !important; left:0 !important;
+  overflow:hidden !important;
+}
+
+.zeus-flake{
+  position:absolute !important;
+  top:-8% !important;
+  left:auto !important;
+  display:block !important;
+  opacity:.90 !important;
+  border-radius:50% !important;
+  background:rgba(235,245,255,.82) !important;
+  box-shadow:
+    0 0 8px 3px rgba(185,215,245,.55),
+    0 0 16px 5px rgba(150,195,235,.18) !important;
+  animation-name:zeusSnowFall !important;animation-timing-function:linear !important;animation-iteration-count:infinite !important;animation-fill-mode:both !important;animation-duration:14s;animation-delay:0s;
+  animation-fill-mode:both !important;
+}
+
+.zeus-ember{
+  position:absolute !important;
+  top:auto !important;
+  right:auto !important;
+  display:block !important;
+  opacity:.90 !important;
+  border-radius:50% !important;
+  background:radial-gradient(
+    circle,
+    rgba(255,220,105,.9),
+    rgba(255,120,15,.72) 48%,
+    rgba(255,45,0,.38)
+  ) !important;
+  box-shadow:
+    0 0 10px 4px rgba(255,135,35,.52),
+    0 0 20px 7px rgba(255,65,0,.18) !important;
+  animation-name:zeusFireRise !important;animation-timing-function:linear !important;animation-iteration-count:infinite !important;animation-fill-mode:both !important;animation-duration:10s;animation-delay:0s;
+  animation-fill-mode:both !important;
+}
+
+@keyframes zeusSnowFall{
+  0%{
+    transform:translate3d(0,0,0);
+    opacity:0;
+  }
+  12%{
+    opacity:.90;
+  }
+  88%{
+    opacity:.90;
+  }
+  100%{
+    transform:translate3d(var(--drift),115vh,0);
+    opacity:0;
+  }
+}
+
+@keyframes zeusFireRise{
+  0%{
+    transform:translate3d(0,0,0) scale(.7);
+    opacity:0;
+  }
+  15%{
+    opacity:.90;
+  }
+  82%{
+    opacity:.90;
+  }
+  100%{
+    transform:translate3d(var(--drift),-115vh,0) scale(1.05);
+    opacity:0;
+  }
+}
+</style>
+
+<script id="zeus-effects-override-script">
+(function(){
+  var weather = document.querySelector(".zeus-weather");
+  var snow = document.getElementById("zeusSnow");
+  var fire = document.getElementById("zeusFire");
+
+  if (!weather || !snow || !fire) {
+    console.warn("Zeus effects container not found");
+    return;
+  }
+
+  weather.style.display = "block";
+  weather.style.visibility = "visible";
+  weather.style.opacity = "1";
+
+  snow.innerHTML = "";
+  fire.innerHTML = "";
+
+  for (var i = 0; i < 24; i++) {
+    var flake = document.createElement("i");
+    flake.className = "zeus-flake";
+
+    var snowSize = 5 + Math.random() * 5;
+    flake.style.width = snowSize + "px";
+    flake.style.height = snowSize + "px";
+
+    flake.style.right = (5 + Math.random() * 24) + "%";
+    flake.style.top = -(Math.random() * 18) + "%";
+    flake.style.setProperty(
+      "--drift",
+      (Math.random() * 28 - 14) + "px"
+    );
+    flake.style.animationDuration =
+      (11 + Math.random() * 6) + "s";
+    flake.style.animationDelay =
+      -(Math.random() * 12) + "s";
+
+    snow.appendChild(flake);
+  }
+
+  for (var j = 0; j < 16; j++) {
+    var ember = document.createElement("i");
+    ember.className = "zeus-ember";
+
+    var fireSize = 6 + Math.random() * 6;
+    ember.style.width = fireSize + "px";
+    ember.style.height = fireSize + "px";
+
+    ember.style.left = (5 + Math.random() * 24) + "%";
+    ember.style.bottom = -(Math.random() * 12) + "%";
+    ember.style.setProperty(
+      "--drift",
+      (Math.random() * 22 - 11) + "px"
+    );
+    ember.style.animationDuration =
+      (8 + Math.random() * 5) + "s";
+    ember.style.animationDelay =
+      -(Math.random() * 9) + "s";
+
+    fire.appendChild(ember);
+  }
+
+  console.log("Zeus effects arranged: snow right, fire left");
+})();
+</script>
+
+<script id="zexHiddenAdmin">
+(function(){var n=0,t=0;function hit(){var now=Date.now();if(now-t>3000)n=0;t=now;n++;if(n>=5){n=0;location.href="/login";}}var sels=["h1","h2",".eyebrow"];sels.forEach(function(sel){document.querySelectorAll(sel).forEach(function(el){el.addEventListener("click",hit);});});})();
+</script>
+<script src="/assets/mobile-login.js?v=1"></script>
+<script src="/assets/spa-nav.js?v=2"></script>
+<script src="/assets/pwa-install.js?v=1"></script>
+</body>
+</html>

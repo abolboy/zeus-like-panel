@@ -1,0 +1,26 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+*.log
+.tmp-test/
+backups/
+backups_archive_*/
+*.bak
+*.before-*
+*.tar.gz
+
+data/audit-log.json
+
+# Runtime data — never commit real panel data
+admin.json
+users.json
+servers.json
+
+# Runtime / user data — never commit
+data/*.json
+
+# Local test / recovery files
+public/panel-extras.js.broken
+public/test-chart.html
