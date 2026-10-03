@@ -17,7 +17,15 @@
   function activate(tabId, push) {
     var target = tabs().filter(function (b) { return b.getAttribute("data-tab") === tabId; })[0];
     if (!target) return;
-    target.click(); // هندلر موجود خود صفحه کارش را می‌کند
+
+    // کلیک برنامه‌ای نباید توسط listener پایین‌تر دوباره pushState کند.
+    window._adminSPAProgrammaticClick = true;
+    try {
+      target.click(); // هندلر موجود خود صفحه کارش را می‌کند
+    } finally {
+      window._adminSPAProgrammaticClick = false;
+    }
+
     if (push) history.pushState({ tab: tabId }, "", "#" + tabId);
     else history.replaceState({ tab: tabId }, "", "#" + tabId);
     fade(panelFor(tabId));
@@ -42,6 +50,8 @@
 
     // sync کردن hash با کلیک روی تب‌ها (بدون دست‌کردن در هندلر اصلی)
     document.addEventListener("click", function (e) {
+      if (window._adminSPAProgrammaticClick) return;
+
       var btn = e.target.closest("[data-tab]");
       if (!btn) return;
       var tabId = btn.getAttribute("data-tab");
