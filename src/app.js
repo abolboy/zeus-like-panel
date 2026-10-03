@@ -40,6 +40,7 @@ function createApp() {
 
   app.use(
     session({
+      name: config.sessionCookieName,
       secret: config.sessionSecret,
       resave: false,
       saveUninitialized: false,
