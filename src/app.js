@@ -46,7 +46,7 @@ function createApp() {
       cookie: {
         httpOnly: true,
         sameSite: "lax",
-        secure: false,
+        secure: config.isProduction,
         maxAge: config.sessionMaxAge,
       },
     })
