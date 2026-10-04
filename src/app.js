@@ -5,6 +5,7 @@ const path = require("path");
 const config = require("./config");
 const { securityHeaders } = require("./middleware/security");
 const { requestLogger } = require("./middleware/request-logger");
+const { csrfProtection } = require("./middleware/csrf");
 
 const authRouter = require("./routes/auth");
 const adminAccountRouter = require("./routes/admin-account");
@@ -52,6 +53,8 @@ function createApp() {
       },
     })
   );
+
+  app.use(csrfProtection);
 
   // صفحات
   app.get("/", (req, res) => {
