@@ -24,3 +24,5 @@ data/*.json
 # Local test / recovery files
 public/panel-extras.js.broken
 public/test-chart.html
+
+data/sessions/

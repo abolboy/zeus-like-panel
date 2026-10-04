@@ -1,5 +1,6 @@
 const express = require("express");
 const session = require("express-session");
+const FileStore = require("session-file-store")(session);
 const path = require("path");
 
 const config = require("./config");
@@ -41,6 +42,11 @@ function createApp() {
 
   app.use(
     session({
+      store: new FileStore({
+        path: path.join(config.rootDir, "data", "sessions"),
+        ttl: Math.floor(config.sessionMaxAge / 1000),
+        reapInterval: 3600,
+      }),
       name: config.sessionCookieName,
       secret: config.sessionSecret,
       resave: false,
