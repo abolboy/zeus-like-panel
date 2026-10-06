@@ -33,6 +33,67 @@
     "مرا به خاطر بسپار": "Remember me", "ورود": "Sign In", "کاربر": "User", "وضعیت فعلی": "Current Status",
     "تاریخ درخواست": "Request Date", "تأیید": "Approve", "رد": "Reject", "بستن": "Close", "انصراف": "Cancel", "گیگ": "GB"
   };
+  /* Extended coverage for static and dynamically rendered UI text. */
+  Object.assign(fa2en, {
+    "بخش تنظیمات": "Settings Section",
+    "دسترسی کامل": "Full Access",
+    "افزودن کاربر جدید": "Add New User",
+    "نام نمایشی پنل": "Panel Display Name",
+    "در حال بررسی…": "Checking…",
+    "در حال بارگذاری...": "Loading...",
+    "وضعیت: در حال بررسی…": "Status: Checking…",
+    "راه‌اندازی کد دومرحله‌ای": "Set Up Two-Factor Authentication",
+    "کد ۶ رقمی": "6-digit code",
+    "فعال‌سازی": "Enable",
+    "دومرحله‌ای فعال شد ✅ از این به بعد ورود = رمز + کد.": "Two-factor authentication enabled ✅ From now on, sign-in requires the password + code.",
+    "درخواست‌های تمدید": "Renewal Requests",
+    "درخواستی نیست": "No requests",
+    "تأیید شد": "Approved",
+    "رد شد": "Rejected",
+    "پلن‌های اشتراک": "Subscription Plans",
+    "پلن آماده (اختیاری)": "Preset Plan (Optional)",
+    "پلن اضافه شد ✅": "Plan added ✅",
+    "پلن حذف شد ✅": "Plan deleted ✅",
+    "انتخاب شده": "Selected",
+    "انتخاب همه": "Select All",
+    "لغو انتخاب": "Clear Selection",
+    "تیکت‌های پشتیبانی": "Support Tickets",
+    "باز": "Open",
+    "بسته": "Closed",
+    "پاسخ": "Reply",
+    "بستن تیکت": "Close Ticket",
+    "تیکتی نیست": "No tickets",
+    "پشتیبانی": "Support",
+    "ارسال": "Send",
+    "اعلان‌ها": "Notifications",
+    "اعلان جدیدی ندارید 🍃": "You have no new notifications 🍃",
+    "✓ خواندن همه": "✓ Mark All Read",
+    "خطای شبکه": "Network error",
+    "خطای ارتباط": "Connection error",
+    "خطا در بارگذاری": "Error loading",
+    "خطا در دریافت تنظیمات": "Error loading settings",
+    "نام پنل ذخیره شد": "Panel name saved",
+    "📊 مصرف ترافیک": "📊 Traffic Usage",
+    "⏳ زمان باقی‌مانده": "⏳ Time Remaining",
+    "📋 اطلاعات اشتراک": "📋 Subscription Information",
+    "🔌 کانفیگ‌های اتصال": "🔌 Connection Configurations",
+    "🔗 لینک سابسکریپشن": "🔗 Subscription Link",
+    "🔑 تغییر رمز عبور": "🔑 Change Password",
+    "🎫 پشتیبانی": "🎫 Support",
+    "📤 ارسال تیکت": "📤 Send Ticket",
+    "🚪 خروج از حساب کاربری": "🚪 Sign Out",
+    "باقی‌مانده": "Remaining",
+    "روزهای باقی‌مانده": "Days Remaining",
+    "نزدیک انقضا": "Expiring Soon",
+    "مصرف (GB)": "Usage (GB)",
+    "مصرف کل (GB)": "Total Usage (GB)",
+    "درخواست تمدید": "Renewal Request",
+    "خطای ورود": "Login Error",
+    "فعال": "Active",
+    "غیرفعال": "Inactive",
+    "نامشخص": "Unknown",
+  });
+
   var en2fa = {};
   Object.keys(fa2en).forEach(function (k) { if (en2fa[fa2en[k]] === undefined) en2fa[fa2en[k]] = k; });
   function currentLang() { return localStorage.getItem("zex-lang") || "fa"; }
@@ -51,6 +112,13 @@
     document.querySelectorAll("input[placeholder], textarea[placeholder]").forEach(function (el) {
       var p = el.getAttribute("placeholder");
       if (map[p] !== undefined) el.setAttribute("placeholder", map[p]);
+    });
+    document.querySelectorAll("[title],[aria-label],[placeholder]").forEach(function (el) {
+      ["title", "aria-label", "placeholder"].forEach(function (name) {
+        if (!el.hasAttribute(name)) return;
+        var value = el.getAttribute(name);
+        if (map[value] !== undefined) el.setAttribute(name, map[value]);
+      });
     });
     var btn = document.getElementById("zexLangBtn");
     if (btn) btn.textContent = lang === "fa" ? "EN" : "فا";
@@ -76,7 +144,15 @@
       window.loadData = function () { var r = orig.apply(this, arguments); setTimeout(applyI18n, 250); return r; };
       window._zexLoadWrapped = true;
     }
-    setInterval(applyI18n, 4000);
+    if (!window._zexI18nObserver) {
+      var observer = new MutationObserver(function () {
+        observer.disconnect();
+        applyI18n();
+        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+      });
+      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+      window._zexI18nObserver = observer;
+    }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
