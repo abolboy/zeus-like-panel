@@ -240,6 +240,181 @@
 
 
 
+<style id="zeus-pro-ui">
+  :root{
+    --panel-glass:rgba(14,18,32,.82);
+    --panel-hover:#171e34;
+    --gold-glow:rgba(242,183,5,.16);
+    --shadow-soft:0 14px 40px rgba(0,0,0,.22);
+  }
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(900px 500px at 85% -10%,rgba(242,183,5,.08),transparent 60%),
+      radial-gradient(700px 420px at 10% 100%,rgba(71,98,170,.10),transparent 62%),
+      var(--bg);
+  }
+  .app{position:relative;}
+  .sidebar{
+    background:linear-gradient(180deg,rgba(14,18,32,.96),rgba(10,13,24,.94));
+    box-shadow:var(--shadow-soft);
+    backdrop-filter:blur(18px);
+    z-index:20;
+  }
+  .brand{
+    position:relative;
+    border-bottom:1px solid rgba(255,255,255,.045);
+    margin-bottom:14px;
+  }
+  .brand svg{
+    filter:drop-shadow(0 0 10px rgba(242,183,5,.35));
+  }
+  .nav{gap:6px;}
+  .nav button{
+    min-height:44px;
+    border:1px solid transparent;
+  }
+  .nav button.active{
+    border-color:rgba(242,183,5,.14);
+    box-shadow:inset 0 0 24px rgba(242,183,5,.035);
+  }
+  .nav button.active::after{
+    content:"";
+    position:absolute;
+    right:-16px;
+    top:8px;
+    bottom:8px;
+    width:3px;
+    border-radius:3px 0 0 3px;
+    background:var(--gold);
+    box-shadow:0 0 12px rgba(242,183,5,.45);
+  }
+  .main{padding:28px 32px 42px;}
+  .page-head{
+    position:sticky;
+    top:0;
+    z-index:10;
+    padding:10px 0 18px;
+    margin-bottom:8px;
+    background:linear-gradient(180deg,rgba(9,12,20,.96) 65%,rgba(9,12,20,0));
+    backdrop-filter:blur(10px);
+  }
+  .page-head h1{font-size:22px;letter-spacing:-.02em;}
+  .page-head p{font-size:12px;}
+  .stats-grid{gap:16px;}
+  .stat,.card{
+    box-shadow:var(--shadow-soft);
+    background:var(--panel-glass);
+    backdrop-filter:blur(12px);
+  }
+  .stat{
+    border-color:rgba(255,255,255,.055);
+    transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+  }
+  .stat:hover{
+    transform:translateY(-2px);
+    border-color:rgba(242,183,5,.20);
+    box-shadow:0 18px 44px rgba(0,0,0,.28);
+  }
+  .stat .value{font-size:28px;}
+  .card{
+    border-color:rgba(255,255,255,.055);
+  }
+  .card-head h3{letter-spacing:-.01em;}
+  .search-box input,.select{
+    min-height:40px;
+    border-radius:10px;
+    background:rgba(19,24,41,.9);
+  }
+  .btn{min-height:40px;border-radius:10px;}
+  .icon-btn{border-radius:9px;}
+  .table-wrap{border:1px solid rgba(255,255,255,.045);border-radius:12px;}
+  table{overflow:hidden;}
+  th{background:rgba(19,24,41,.58);}
+  tr{transition:background .14s ease;}
+  tbody tr:hover{background:rgba(255,255,255,.018);}
+  .modal-card{
+    box-shadow:0 28px 90px rgba(0,0,0,.48);
+    border-color:rgba(255,255,255,.08);
+  }
+  .toasts{bottom:24px;left:24px;}
+  .mobile-nav{
+    display:none;
+  }
+  .mobile-nav button{
+    flex:1;
+    min-height:48px;
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    font-size:10px;
+  }
+  .mobile-nav button.active{color:var(--gold);}
+  @media (max-width:760px){
+    body{padding-bottom:68px;}
+    .sidebar{
+      width:100%;
+      height:58px;
+      position:fixed;
+      top:0;
+      right:0;
+      left:0;
+      padding:8px 14px;
+      border-left:0;
+      border-bottom:1px solid var(--border);
+    }
+    .sidebar>div:first-child{display:flex;align-items:center;width:100%;}
+    .brand{border:0;margin:0;padding:0;}
+    .brand span{font-size:14px;}
+    .sidebar .nav{display:none;}
+    .sidebar-bottom{margin-inline-start:auto;}
+    .admin-chip{padding:0;border:0;}
+    .admin-chip small,.admin-chip div{display:none;}
+    .admin-avatar{display:flex;width:32px;height:32px;}
+    .btn-logout-icon{display:none;}
+    .main{padding:78px 14px 24px;}
+    .page-head{padding-top:8px;}
+    .page-head h1{font-size:19px;}
+    .stats-grid{gap:9px;}
+    .stat{padding:13px 14px;border-radius:11px;}
+    .stat .value{font-size:22px;}
+    .stat .label{font-size:10.5px;}
+    .card{padding:14px;border-radius:12px;}
+    .card-head{align-items:stretch;}
+    .toolbar{width:100%;}
+    .search-box{flex:1;}
+    .search-box input{width:100%;}
+    .mobile-nav{
+      position:fixed;
+      display:flex;
+      right:8px;
+      left:8px;
+      bottom:8px;
+      height:58px;
+      z-index:2000;
+      padding:4px;
+      background:rgba(14,18,32,.94);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 16px 40px rgba(0,0,0,.42);
+      backdrop-filter:blur(18px);
+    }
+    .mobile-nav button{border-radius:12px;}
+    .mobile-nav button.active{background:var(--gold-soft);}
+    .nav button.active::after{display:none;}
+    .table-wrap{border-radius:10px;}
+    .toasts{left:12px;right:12px;bottom:76px;}
+    .toast{min-width:0;width:100%;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important;}
+  }
+</style>
 <style id="white-star-snow-fix">
   .zeus-flake{
     background:#ffffff !important;
@@ -540,6 +715,25 @@
 </div>
 
 <div class="toasts" id="toasts"></div>
+
+  <nav class="mobile-nav" aria-label="ناوبری سریع">
+    <button data-tab="users-tab" aria-label="کاربران">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19c1-3.3 3.6-5 6.5-5s5.5 1.7 6.5 5"/></svg>
+      <span>کاربران</span>
+    </button>
+    <button data-tab="servers-tab" aria-label="سرورها">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>
+      <span>سرورها</span>
+    </button>
+    <button data-tab="reports-tab" aria-label="گزارش‌ها">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+      <span>گزارش‌ها</span>
+    </button>
+    <button data-tab="settings-tab" aria-label="تنظیمات">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 13.5a7 7 0 0 0 0-3"/></svg>
+      <span>تنظیمات</span>
+    </button>
+  </nav>
 
 <script>
   // ============ Helpers ============
