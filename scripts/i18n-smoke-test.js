@@ -27,6 +27,6 @@ assert.ok(source.includes("MutationObserver"), "Dynamic DOM observer missing");
 assert.ok(source.includes('[title],[aria-label],[placeholder]'), "Attribute translation missing");
 
 const dashboard = fs.readFileSync("dashboard.html", "utf8");
-assert.ok(dashboard.includes("/assets/zex-i18n.js?v=1"), "dashboard must load zex-i18n");
+assert.ok(dashboard.includes("/assets/zex-i18n.js?v=2"), "dashboard must load zex-i18n");
 
 console.log("I18N_STATIC_OK");
