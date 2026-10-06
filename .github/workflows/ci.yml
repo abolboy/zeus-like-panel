@@ -46,6 +46,9 @@ jobs:
           console.log(`Dashboard inline JavaScript syntax passed (${scripts.length} scripts)`);
           NODE
 
+      - name: Bilingual UI regression test
+        run: node scripts/i18n-smoke-test.js
+
       - name: TOTP verification vectors
         run: |
           node <<'NODE'
