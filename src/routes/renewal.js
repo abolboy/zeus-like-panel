@@ -88,6 +88,7 @@ router.post("/:id/approve", requireAdmin, (req, res) => {
     u.expiry = expStr;
     u.traffic = (Number(u.traffic) || 0) + r.planTraffic;
     u.active = true;
+    u.authVersion = Number(u.authVersion || 0) + 1;
     saveUsers(users);
     r.status = "approved";
     try { sendNotification(u.username, "تأیید تمدید", "درخواست تمدید شما تأیید شد. اشتراک شما به‌روز شد."); } catch(e){}
