@@ -69,7 +69,7 @@ const settingsRequired = [
 for (const [fa, en] of settingsRequired) {
   assert.ok(source.includes(JSON.stringify(fa) + ": " + JSON.stringify(en)), "Missing settings mapping: " + fa);
 }
-assert.ok(source.includes(JSON.stringify("رمز عبور جدید (۱۲ تا ۷۲ بایت UTF-8)") + ": " + JSON.stringify("New Password (12–72 UTF-8 bytes)")), "Updated password policy mapping missing");
+assert.ok(source.includes('fa2en["رمز عبور جدید (۱۲ تا ۷۲ بایت UTF-8)"] = "New Password (12–72 UTF-8 bytes)"'), "Updated password policy mapping missing");
 
 const userHtml = fs.readFileSync("sub.html", "utf8");
 assert.ok(userHtml.includes('/assets/zex-i18n.js?v=3'), "user dashboard must load zex-i18n v3");
