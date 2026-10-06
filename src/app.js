@@ -39,6 +39,7 @@ function createApp() {
   app.use(requestLogger);
   app.use((req, res, next) => { res.setHeader("Cache-Control", "no-store"); next(); });
   app.use(express.json({ limit: "100kb", inflate: false }));
+  app.use(express.urlencoded({ extended: false, limit: "100kb", inflate: false }));
   app.use("/assets", express.static(config.publicDir));
 
   app.use(
