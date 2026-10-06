@@ -305,6 +305,7 @@
     "فعال ✅": "Active ✅",
     "غیرفعال ❌": "Inactive ❌"
   });
+  fa2en["رمز عبور جدید (۱۲ تا ۷۲ بایت UTF-8)"] = "New Password (12–72 UTF-8 bytes)";
   var en2fa = {};
   Object.keys(fa2en).forEach(function (k) { if (en2fa[fa2en[k]] === undefined) en2fa[fa2en[k]] = k; });
   function currentLang() { return localStorage.getItem("zex-lang") || "fa"; }
