@@ -72,6 +72,8 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     const subSource = fs.readFileSync(path.join(config.rootDir, "src", "routes", "subscription.js"), "utf8");
     const appSource = fs.readFileSync(path.join(config.rootDir, "src", "app.js"), "utf8");
     const loggerSource = fs.readFileSync(path.join(config.rootDir, "src", "middleware", "request-logger.js"), "utf8");
+    const securitySource = fs.readFileSync(path.join(config.rootDir, "src", "middleware", "security.js"), "utf8");
+    const settingsSource = fs.readFileSync(path.join(config.rootDir, "src", "routes", "settings.js"), "utf8");
 
     assert.match(usersSource, /user\.authVersion = Number\(user\.authVersion \|\| 0\) \+ 1;/);
     assert.match(usersSource, /\{ passwordHash, subToken, \.\.\.safe \}/);
@@ -81,6 +83,9 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     assert.match(subSource, /Cache-Control.*no-store/);
     assert.match(appSource, /express\.json\(\{ limit: "100kb", inflate: false \}\)/);
     assert.match(loggerSource, /url: req\.path/);
+    assert.match(securitySource, /Strict-Transport-Security/);
+    assert.match(securitySource, /Permissions-Policy/);
+    assert.match(settingsSource, /length > 80/);
 
     const createApp = require("../src/app");
     const app = createApp();
@@ -94,6 +99,9 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
       assert.strictEqual(health.status, 200);
       const healthBody = await health.json();
       assert.strictEqual(healthBody.ok, true);
+      assert.strictEqual(health.headers.get("x-content-type-options"), "nosniff");
+      assert.strictEqual(health.headers.get("x-frame-options"), "DENY");
+      assert.strictEqual(health.headers.get("referrer-policy"), "no-referrer");
 
       const unauth = await fetch(base + "/api/users");
       assert.strictEqual(unauth.status, 401);
