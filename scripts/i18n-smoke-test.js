@@ -31,6 +31,30 @@ assert.ok(dashboard.includes("/assets/zex-i18n.js?v=3"), "dashboard must load ze
 
 console.log("I18N_STATIC_OK");
 
+const adminSectionsRequired = [
+  ["مدیریت کاربران", "User Management"],
+  ["مدیریت سرورها", "Server Management"],
+  ["ویرایش", "Edit"],
+  ["حذف", "Delete"],
+  ["QR لینک اشتراک", "Subscription Link QR"],
+  ["کپی لینک اشتراک", "Copy Subscription Link"],
+  ["کاربر جدید اضافه شد", "New user added"],
+  ["سرور اضافه شد", "Server added"],
+  ["خطا در دریافت نمودار", "Error loading chart"],
+  ["درخواست‌های تمدید", "Renewal Requests"],
+  ["لاگ فعالیت‌ها", "Activity Log"],
+  ["اعلان‌ها", "Notifications"]
+];
+for (const [fa, en] of adminSectionsRequired) {
+  assert.ok(source.includes(JSON.stringify(fa) + ": " + JSON.stringify(en)), "Missing admin section mapping: " + fa);
+}
+assert.ok(source.includes("function translateText"), "Dynamic text translation helper missing");
+assert.ok(source.includes('["حذف کاربر ", "Delete user "]'), "Dynamic user deletion translation missing");
+assert.ok(source.includes('["حذف سرور ", "Delete server "]'), "Dynamic server deletion translation missing");
+assert.ok(source.includes("document.title = translateText"), "Document title translation missing");
+console.log("ADMIN_SECTIONS_I18N_OK");
+
+
 const settingsRequired = [
   ["بخش تنظیمات", "Settings Section"],
   ["نام پنل و اطلاعات ورود مدیر", "Panel name and administrator login information"],
