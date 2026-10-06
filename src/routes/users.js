@@ -57,6 +57,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
   if (index === -1) return res.status(404).json({ error: "کاربر پیدا نشد" });
 
   const user = users[index];
+  let authChanged = false;
   if (req.body.username !== undefined) {
     if (typeof req.body.username !== "string" || !req.body.username.trim()) {
       return res.status(400).json({ error: "نام کاربری باید یک رشته غیرخالی باشد" });
@@ -69,6 +70,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
       return res.status(400).json({ error: "این نام کاربری قبلاً وجود دارد" });
     }
     user.username = newUsername;
+    authChanged = true;
   }
   if (req.body.expiry !== undefined) {
     if (!isValidExpiryFormat(req.body.expiry)) {
@@ -86,8 +88,10 @@ router.put("/:id", requireAdmin, async (req, res) => {
   if (req.body.active !== undefined) {
     if (typeof req.body.active === "boolean") {
       user.active = req.body.active;
+      authChanged = true;
     } else if (req.body.active === "true" || req.body.active === "false") {
       user.active = req.body.active === "true";
+      authChanged = true;
     } else {
       return res.status(400).json({ error: "وضعیت فعال باید true یا false باشد" });
     }
@@ -97,8 +101,9 @@ router.put("/:id", requireAdmin, async (req, res) => {
       return res.status(400).json({ error: "رمز باید بین ۱۲ تا ۲۵۶ کاراکتر باشد" });
     }
     user.passwordHash = await bcrypt.hash(req.body.password, 12);
-    user.authVersion = Number(user.authVersion || 0) + 1;
+    authChanged = true;
   }
+  if (authChanged) user.authVersion = Number(user.authVersion || 0) + 1;
   if (req.body.serverIds !== undefined) {
     user.serverIds = sanitizeServerIds(req.body.serverIds);
   }
@@ -130,7 +135,7 @@ router.post("/:id/toggle", requireAdmin, async (req, res) => {
 
 
 router.get("/export", requireAdmin, (req, res) => {
-  const users = loadUsers();
+  const users = loadUsers().map(({ passwordHash, ...safe }) => safe);
   res.setHeader("Content-Disposition", 'attachment; filename="zeus-users-' + Date.now() + '.json"');
   res.json({ exportedAt: new Date().toISOString(), users });
 });
@@ -149,6 +154,7 @@ router.post("/import", requireAdmin, async (req, res) => {
       id: String(item.id || Date.now() + Math.random()),
       username,
       passwordHash: String(item.passwordHash),
+      authVersion: Number(item.authVersion) || 0,
       expiry: item.expiry || "",
       traffic: Number(item.traffic) || 0,
       serverIds: sanitizeServerIds(item.serverIds),
@@ -177,6 +183,7 @@ router.post("/sms/phone", requireAdmin, (req, res) => {
   const wasEmpty = !u.phone;
   u.phone = phone;
   saveUsers(users);
+  logEvent("user.phone_updated", req.session.admin, { username: u.username, hasPhone: Boolean(phone) }, req);
   let welcomeSent = false;
   if (wasEmpty && phone) {
     const base = config.publicBaseUrl || req.protocol + "://" + req.get("host");
