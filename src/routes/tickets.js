@@ -9,6 +9,16 @@ const file = path.join(config.rootDir, "data", "tickets.json");
 function load() { try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch (e) { return []; } }
 function save(list) { fs.writeFileSync(file, JSON.stringify(list, null, 2)); }
 function now() { return new Date().toISOString(); }
+
+// Accept the canonical `text` field and common aliases so the ticket API
+// remains compatible with older/newer client widgets. Invisible Unicode
+// spacing characters are removed before the empty-message check.
+function getTicketText(body) {
+  const value = typeof body === "string"
+    ? body
+    : body && (body.text ?? body.message ?? body.content);
+  return String(value ?? "").replace(/[\\u200B-\\u200D\\uFEFF]/g, "").trim();
+}
 function tgNotify(text) {
   const token = process.env.TG_BOT_TOKEN, admin = process.env.TG_ADMIN_ID;
   if (!token || !admin) return;
@@ -19,7 +29,7 @@ function tgNotify(text) {
 }
 
 router.post("/", requireUser, (req, res) => {
-  const text = String((req.body && req.body.text) || "").trim();
+  const text = getTicketText(req.body);
   if (!text) return res.status(400).json({ error: "متن خالی است" });
   const list = load();
   const username = req.session.username;
@@ -56,7 +66,7 @@ router.get("/:id", requireAdmin, (req, res) => {
 });
 
 router.post("/:id/reply", requireAdmin, (req, res) => {
-  const text = String((req.body && req.body.text) || "").trim();
+  const text = getTicketText(req.body);
   if (!text) return res.status(400).json({ error: "متن خالی است" });
   const list = load();
   const t = list.find(x => x.id === req.params.id);
