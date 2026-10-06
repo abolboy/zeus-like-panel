@@ -35,6 +35,7 @@ router.get("/:username", requireUserOrAdmin, (req, res) => {
   }
   const user = loadUsers().find((u) => u.username === username);
   if (!user) return res.status(404).json({ error: "کاربر یافت نشد" });
+  if (!user.active) return res.status(403).json({ error: "این حساب غیرفعال است" });
   if (req.session.userId && isExpired(user.expiry)) {
     return res.status(403).json({ error: "اشتراک شما منقضی شده است. برای تمدید با مدیر پنل تماس بگیرید." });
   }
@@ -84,7 +85,7 @@ router.get("/qrlink/:username/:idx", requireUserOrAdmin, async (req, res) => {
 
 router.get("/b64/:username", (req, res) => {
   const user = loadUsers().find((u) => u.username === req.params.username);
-  if (!user || !user.subToken || !safeEqualText(user.subToken, String(req.query.token || ""))) {
+  if (!user || !user.active || isExpired(user.expiry) || !user.subToken || !safeEqualText(user.subToken, String(req.query.token || ""))) {
     return res.status(403).send("Forbidden");
   }
   const links = buildConfigs(user).map((c) => c.link);
@@ -101,7 +102,7 @@ router.get("/b64/:username", (req, res) => {
   res.send(b64);
 });
 
-router.post("/token/:username", requireUserOrAdmin, (req, res) => {
+router.post("/token/:username", requireUserOrAdmin, async (req, res) => {
   const { username } = req.params;
   if (req.session.userId && req.session.username !== username) {
     return res.status(403).json({ error: "دسترسی ندارید" });
@@ -109,8 +110,8 @@ router.post("/token/:username", requireUserOrAdmin, (req, res) => {
   const users = loadUsers();
   const user = users.find((u) => u.username === username);
   if (!user) return res.status(404).json({ error: "کاربر یافت نشد" });
-  user.subToken = crypto.randomBytes(12).toString("hex");
-  saveUsers(users);
+  user.subToken = crypto.randomBytes(32).toString("hex");
+  await saveUsers(users);
   res.json({ ok: true, token: user.subToken });
 });
 
@@ -123,8 +124,8 @@ router.get("/qrsub/:username", requireUserOrAdmin, async (req, res) => {
   const user = users.find((u) => u.username === username);
   if (!user) return res.status(404).json({ error: "کاربر یافت نشد" });
   if (!user.subToken) {
-    user.subToken = crypto.randomBytes(12).toString("hex");
-    saveUsers(users);
+    user.subToken = crypto.randomBytes(32).toString("hex");
+    await saveUsers(users);
   }
   if (!QR) return res.status(500).json({ error: "ماژول qrcode نصب نیست" });
   const url = (config.publicBaseUrl || req.protocol + "://" + req.get("host")) + "/api/sub/b64/" + encodeURIComponent(username) + "?token=" + user.subToken;
