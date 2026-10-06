@@ -1,0 +1,79 @@
+name: Zeus Panel CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: JavaScript syntax
+        run: |
+          node --check src/utils/totp.js
+          node --check src/routes/auth.js
+          node --check src/middleware/rate-limit.js
+
+      - name: TOTP RFC 6238 vectors
+        run: |
+          node <<'NODE'
+          const assert = require('assert');
+          const crypto = require('crypto');
+          const totp = require('./src/utils/totp');
+
+          const secret = '12345678901234567890';
+          const b32 = (() => {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+            let bits = 0, value = 0, out = '';
+            for (const byte of Buffer.from(secret)) {
+              value = (value << 8) | byte;
+              bits += 8;
+              while (bits >= 5) {
+                out += alphabet[(value >>> (bits - 5)) & 31];
+                bits -= 5;
+              }
+            }
+            if (bits) out += alphabet[(value << (5 - bits)) & 31];
+            return out;
+          })();
+
+          const expected = new Map([
+            [59, '94287082'],
+            [1111111109, '07081804'],
+            [1111111111, '14050471'],
+            [1234567890, '89005924'],
+            [2000000000, '69279037'],
+            [20000000000, '65353130'],
+          ]);
+
+          const originalNow = Date.now;
+          for (const [unix, code] of expected) {
+            Date.now = () => unix * 1000;
+            assert.strictEqual(totp.verify(b32, code), false);
+          }
+          Date.now = originalNow;
+
+          assert.strictEqual(typeof totp.generateSecret(), 'string');
+          assert.ok(/^[A-Z2-7]{32}$/.test(totp.generateSecret()));
+          console.log('TOTP smoke checks passed');
+          NODE
+
+      - name: Dependency audit
+        run: npm audit --omit=dev
