@@ -305,7 +305,7 @@
     "فعال ✅": "Active ✅",
     "غیرفعال ❌": "Inactive ❌"
   });
-\n  var en2fa = {};
+  var en2fa = {};
   Object.keys(fa2en).forEach(function (k) { if (en2fa[fa2en[k]] === undefined) en2fa[fa2en[k]] = k; });
   function currentLang() { return localStorage.getItem("zex-lang") || "fa"; }
   function translateText(value, map, lang) {
