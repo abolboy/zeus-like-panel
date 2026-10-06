@@ -10,7 +10,7 @@ const { requireAdmin } = require("../middleware/auth");
 const { logEvent } = require("../utils/audit");
 
 router.get("/", requireAdmin, (req, res) => {
-  const users = loadUsers().map(({ passwordHash, ...safe }) => safe);
+  const users = loadUsers().map(({ passwordHash, subToken, ...safe }) => safe);
   res.json(users);
 });
 
