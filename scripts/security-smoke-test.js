@@ -83,7 +83,7 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     assert.match(subSource, /safeEqualText\(user\.subToken/);
     assert.match(subSource, /Cache-Control.*no-store/);
     assert.match(appSource, /express\.json\(\{ limit: "100kb", inflate: false \}\)/);
-    assert.match(loggerSource, /url: req\\.path/);
+    assert.ok(loggerSource.includes("url: req.path"));
     assert.match(securitySource, /Permissions-Policy/);
     assert.match(securitySource, /Strict-Transport-Security/);
     assert.match(securitySource, /fonts\\.googleapis\\.com/);
