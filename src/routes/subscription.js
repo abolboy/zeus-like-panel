@@ -35,7 +35,7 @@ router.get("/:username", requireUserOrAdmin, (req, res) => {
   }
   const user = loadUsers().find((u) => u.username === username);
   if (!user) return res.status(404).json({ error: "کاربر یافت نشد" });
-  if (!user.active) return res.status(403).json({ error: "این حساب غیرفعال است" });
+  if (req.session.userId && !user.active) return res.status(403).json({ error: "این حساب غیرفعال است" });
   if (req.session.userId && isExpired(user.expiry)) {
     return res.status(403).json({ error: "اشتراک شما منقضی شده است. برای تمدید با مدیر پنل تماس بگیرید." });
   }
@@ -75,6 +75,7 @@ router.get("/qrlink/:username/:idx", requireUserOrAdmin, async (req, res) => {
   }
   const user = loadUsers().find((u) => u.username === username);
   if (!user) return res.status(404).json({ error: "کاربر یافت نشد" });
+  if (req.session.userId && (!user.active || isExpired(user.expiry))) return res.status(403).json({ error: "اشتراک در دسترس نیست" });
   if (!QR) return res.status(500).json({ error: "ماژول qrcode نصب نیست" });
   const configs = buildConfigs(user);
   const i = Number(idx);
@@ -123,6 +124,7 @@ router.get("/qrsub/:username", requireUserOrAdmin, async (req, res) => {
   const users = loadUsers();
   const user = users.find((u) => u.username === username);
   if (!user) return res.status(404).json({ error: "کاربر یافت نشد" });
+  if (req.session.userId && (!user.active || isExpired(user.expiry))) return res.status(403).json({ error: "اشتراک در دسترس نیست" });
   if (!user.subToken) {
     user.subToken = crypto.randomBytes(32).toString("hex");
     await saveUsers(users);
