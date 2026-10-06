@@ -308,16 +308,48 @@
 \n  var en2fa = {};
   Object.keys(fa2en).forEach(function (k) { if (en2fa[fa2en[k]] === undefined) en2fa[fa2en[k]] = k; });
   function currentLang() { return localStorage.getItem("zex-lang") || "fa"; }
+  function translateText(value, map, lang) {
+    if (map[value] !== undefined) return map[value];
+    var pairs = lang === "en"
+      ? [
+          ["حذف کاربر ", "Delete user "],
+          ["حذف سرور ", "Delete server "],
+          ["تمدید تأیید شد — انقضای جدید: ", "Renewal approved — new expiry: "],
+          ["وارد شد: ", "Imported: "],
+          ["مدیر: ", "Admin: "],
+          ["وضعیت: ", "Status: "]
+        ]
+      : [
+          ["Delete user ", "حذف کاربر "],
+          ["Delete server ", "حذف سرور "],
+          ["Renewal approved — new expiry: ", "تمدید تأیید شد — انقضای جدید: "],
+          ["Imported: ", "وارد شد: "],
+          ["Admin: ", "مدیر: "],
+          ["Status: ", "وضعیت: "]
+        ];
+    for (var i = 0; i < pairs.length; i++) {
+      var from = pairs[i][0];
+      if (value.indexOf(from) === 0) {
+        var rest = value.slice(from.length);
+        return pairs[i][1] + (map[rest] !== undefined ? map[rest] : rest);
+      }
+    }
+    return value;
+  }
   function applyI18n() {
     var lang = currentLang();
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "fa" ? "rtl" : "ltr";
     var map = lang === "en" ? fa2en : en2fa;
+    if (document.title) document.title = translateText(document.title, map, lang);
     var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
     var node, batch = [];
     while ((node = walker.nextNode())) {
       var trimmed = node.textContent.trim();
-      if (trimmed && map[trimmed] !== undefined) batch.push([node, map[trimmed]]);
+      if (trimmed) {
+        var translated = translateText(trimmed, map, lang);
+        if (translated !== trimmed) batch.push([node, translated]);
+      }
     }
     batch.forEach(function (p) { p[0].textContent = p[1]; });
     document.querySelectorAll("input[placeholder], textarea[placeholder]").forEach(function (el) {
