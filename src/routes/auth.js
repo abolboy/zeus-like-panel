@@ -26,10 +26,25 @@ const { atomicWrite } = require("../store/base");
 
 router.get("/me", (req, res) => {
   if (req.session?.admin) {
-    return res.json({ loggedIn: true, role: "admin", username: req.session.admin });
+    const admin = loadAdmin();
+    if (
+      admin &&
+      req.session.admin === admin.username &&
+      Number(req.session.authVersion ?? 0) === Number(admin.authVersion ?? 0)
+    ) {
+      return res.json({ loggedIn: true, role: "admin", username: admin.username });
+    }
   }
   if (req.session?.userId) {
-    return res.json({ loggedIn: true, role: "user", username: req.session.username });
+    const user = loadUsers().find((item) => String(item.id) === String(req.session.userId));
+    if (
+      user &&
+      user.active &&
+      !isExpired(user.expiry) &&
+      Number(req.session.authVersion ?? 0) === Number(user.authVersion ?? 0)
+    ) {
+      return res.json({ loggedIn: true, role: "user", username: user.username });
+    }
   }
   res.status(401).json({ loggedIn: false });
 });
@@ -81,9 +96,11 @@ router.post("/user-login", loginGuard("user"), async (req, res) => {
     return res.status(401).json({ error: "نام کاربری یا رمز عبور اشتباه است" });
   }
   if (!user.active) {
+    registerFailure(req._loginGuardKey, req._loginGuardIpKey);
     return res.status(403).json({ error: "این حساب غیرفعال شده است. با مدیر پنل تماس بگیرید." });
   }
   if (isExpired(user.expiry)) {
+    registerFailure(req._loginGuardKey, req._loginGuardIpKey);
     return res.status(403).json({
       error: "اشتراک شما منقضی شده است. برای تمدید درخواست بفرستید.",
       expired: true,
@@ -115,6 +132,8 @@ router.post("/user-login", loginGuard("user"), async (req, res) => {
 });
 
 router.post("/logout", (req, res) => {
+  const actor = req.session?.admin || req.session?.username || "unknown";
+  logEvent("auth.logout", actor, { success: true }, req);
   req.session.destroy(() => res.json({ ok: true }));
 });
 
