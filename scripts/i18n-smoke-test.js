@@ -75,3 +75,8 @@ const admin = fs.readFileSync("dashboard.html", "utf8");
 assert.ok(admin.includes('minlength="12"'), "admin password UI must require 12 characters");
 assert.ok(admin.includes("رمز عبور جدید (حداقل ۱۲ کاراکتر)"), "admin password label is stale");
 console.log("SETTINGS_AND_USER_I18N_OK");
+
+const userDashboard = fs.readFileSync("public/user-dashboard.js", "utf8");
+assert.ok(userDashboard.includes("JSON.stringify({ text: text })"), "User ticket client must send the text field");
+assert.ok(!userDashboard.includes("JSON.stringify({ message: text })"), "User ticket client still sends the wrong message field");
+console.log("USER_TICKET_PAYLOAD_OK");
