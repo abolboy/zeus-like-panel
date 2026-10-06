@@ -47,6 +47,7 @@ router.post("/", requireAdmin, async (req, res) => {
   };
   users.push(user);
   await saveUsers(users);
+  logEvent("user.create", req.session.admin, { userId: user.id, username: user.username }, req);
   res.json({ ok: true, id: user.id });
 });
 
@@ -150,7 +151,7 @@ router.post("/import", requireAdmin, async (req, res) => {
       passwordHash: String(item.passwordHash),
       expiry: item.expiry || "",
       traffic: Number(item.traffic) || 0,
-      serverIds: Array.isArray(item.serverIds) ? item.serverIds : [],
+      serverIds: sanitizeServerIds(item.serverIds),
       renewalRequested: item.renewalRequested || null,
       active: item.active !== false,
       createdAt: item.createdAt || new Date().toISOString(),
@@ -159,6 +160,7 @@ router.post("/import", requireAdmin, async (req, res) => {
     added += 1;
   }
   await saveUsers(users);
+  logEvent("user.import", req.session.admin, { added, skipped }, req);
   res.json({ ok: true, added, skipped });
 });
 
@@ -201,6 +203,7 @@ router.post("/bulk", requireAdmin, (req, res) => {
     else if (action === "delete") { users.splice(users.indexOf(u), 1); changed++; }
   });
   saveUsers(users);
+  logEvent("user.bulk_mutation", req.session.admin, { action, changed }, req);
   res.json({ ok: true, changed: changed });
 });
 
