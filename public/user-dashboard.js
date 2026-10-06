@@ -164,7 +164,8 @@
     var sendTicketBtn = document.getElementById("sendTicket");
     if (sendTicketBtn) {
       sendTicketBtn.addEventListener("click", function () {
-        var text = document.getElementById("ticketText").value.trim();
+        var ticketInput = document.getElementById("ticketText");
+        var text = String(ticketInput && ticketInput.value || "").trim();
         if (!text) {
           alert("لطفاً پیام خود را بنویسید");
           return;
