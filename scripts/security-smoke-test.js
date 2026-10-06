@@ -61,7 +61,7 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
 
     const proxyInvalid = spawnSync(process.execPath, ["-e", "require('./src/config')"], {
       cwd: config.rootDir,
-      env: { ...process.env, NODE_ENV: "test", SESSION_SECRET: "ci-test-session-secret", TRUST_PROXY: "not-a-valid-proxy" },
+      env: { ...process.env, NODE_ENV: "test", SESSION_SECRET: "ci-test-session-secret", TRUST_PROXY: "not a valid proxy" },
       encoding: "utf8",
     });
     assert.notStrictEqual(proxyInvalid.status, 0);
