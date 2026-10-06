@@ -27,6 +27,27 @@ assert.ok(source.includes("MutationObserver"), "Dynamic DOM observer missing");
 assert.ok(source.includes('[title],[aria-label],[placeholder]'), "Attribute translation missing");
 
 const dashboard = fs.readFileSync("dashboard.html", "utf8");
-assert.ok(dashboard.includes("/assets/zex-i18n.js?v=2"), "dashboard must load zex-i18n");
+assert.ok(dashboard.includes("/assets/zex-i18n.js?v=3"), "dashboard must load zex-i18n v3");
 
 console.log("I18N_STATIC_OK");
+
+const settingsRequired = [
+  ["بخش تنظیمات", "Settings Section"],
+  ["نام پنل و اطلاعات ورود مدیر", "Panel name and administrator login information"],
+  ["تغییر نام کاربری مدیر", "Change Admin Username"],
+  ["تغییر رمز عبور مدیر", "Change Admin Password"],
+  ["رمز عبور جدید (حداقل ۱۲ کاراکتر)", "New Password (minimum 12 characters)"],
+  ["پشتیبان‌گیری کامل", "Full Backup"],
+  ["دانلود بکاپ", "Download Backup"],
+  ["ذخیره", "Save"],
+  ["انصراف", "Cancel"]
+];
+for (const [fa, en] of settingsRequired) {
+  assert.ok(source.includes(JSON.stringify(fa) + ": " + JSON.stringify(en)), "Missing settings mapping: " + fa);
+}
+const userHtml = fs.readFileSync("sub.html", "utf8");
+assert.ok(userHtml.includes('/assets/zex-i18n.js?v=3'), "user dashboard must load zex-i18n v3");
+const admin = fs.readFileSync("dashboard.html", "utf8");
+assert.ok(admin.includes('minlength="12"'), "admin password UI must require 12 characters");
+assert.ok(admin.includes("رمز عبور جدید (حداقل ۱۲ کاراکتر)"), "admin password label is stale");
+console.log("SETTINGS_AND_USER_I18N_OK");
