@@ -584,26 +584,75 @@
     return { label: "فعال", cls: "badge-on" };
   }
 
-  // ============ Tabs ============
-  document.querySelectorAll(".nav button").forEach(btn => {
-    btn.addEventListener("click", () => showTab(btn.dataset.tab));
-  });
-  const titles = {
-    "users-tab": ["مدیریت کاربران", "فهرست، وضعیت و اشتراک‌های کاربران سرویس"],
-    "servers-tab": ["سرورها", "مدیریت سرورهای متصل به سرویس"],
-    "reports-tab": ["گزارش‌ها", "رشد کاربران و درخواست‌های تمدید در انتظار"],
-    "settings-tab": ["تنظیمات", "نام پنل و اطلاعات ورود مدیر"]
+  // ============ SPA Router ============
+  const SPA_ROUTES = {
+    users: { tab: "users-tab", title: "مدیریت کاربران", sub: "فهرست، وضعیت و اشتراک‌های کاربران سرویس" },
+    servers: { tab: "servers-tab", title: "سرورها", sub: "مدیریت سرورهای متصل به سرویس" },
+    reports: { tab: "reports-tab", title: "گزارش‌ها", sub: "رشد کاربران و درخواست‌های تمدید در انتظار" },
+    settings: { tab: "settings-tab", title: "تنظیمات", sub: "نام پنل و اطلاعات ورود مدیر" }
   };
-  function showTab(id) {
-    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
-    document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === id));
-    document.getElementById("pageTitle").textContent = titles[id][0];
-    document.getElementById("pageSub").textContent = titles[id][1];
-    if (id === "servers-tab") loadServers();
-    if (id === "settings-tab") loadSettings();
-    if (id === "reports-tab") { loadGrowthChart(); loadRenewalRequests(); }
+
+  let activeSpaRoute = "";
+
+  document.querySelectorAll(".nav button").forEach(btn => {
+    btn.addEventListener("click", () => navigateSpa(btn.dataset.tab));
+  });
+
+  function routeFromTab(tabId) {
+    const entry = Object.entries(SPA_ROUTES).find(([, route]) => route.tab === tabId);
+    return entry ? entry[0] : "users";
   }
+
+  function getSpaRoute() {
+    const raw = window.location.hash.replace(/^#\/?/, "").trim().toLowerCase();
+    return SPA_ROUTES[raw] ? raw : "users";
+  }
+
+  function navigateSpa(tabOrRoute, replace = false) {
+    const route = SPA_ROUTES[tabOrRoute] ? tabOrRoute : routeFromTab(tabOrRoute);
+    const hash = "#" + route;
+    if (window.location.hash !== hash) {
+      if (replace) window.history.replaceState({ spa: route }, "", hash);
+      else window.history.pushState({ spa: route }, "", hash);
+    }
+    renderSpaRoute(route);
+  }
+
+  function renderSpaRoute(route = getSpaRoute()) {
+    const view = SPA_ROUTES[route] || SPA_ROUTES.users;
+    if (activeSpaRoute === route) {
+      document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === view.tab));
+      return;
+    }
+
+    activeSpaRoute = route;
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+    const tab = document.getElementById(view.tab);
+    if (!tab) return;
+    tab.classList.add("active");
+
+    document.querySelectorAll(".nav button").forEach(b => {
+      b.classList.toggle("active", b.dataset.tab === view.tab);
+      b.setAttribute("aria-current", b.dataset.tab === view.tab ? "page" : "false");
+    });
+
+    document.getElementById("pageTitle").textContent = view.title;
+    document.getElementById("pageSub").textContent = view.sub;
+    document.title = view.title + " | " + (document.getElementById("brandName")?.textContent || "Zeus Panel");
+
+    if (route === "servers") loadServers();
+    if (route === "settings") loadSettings();
+    if (route === "reports") {
+      loadGrowthChart();
+      loadRenewalRequests();
+    }
+  }
+
+  window.addEventListener("hashchange", () => renderSpaRoute());
+  window.addEventListener("popstate", () => renderSpaRoute());
+
+  // Initial deep-link: /dashboard#servers (or any supported route).
+  navigateSpa(getSpaRoute(), true);
 
   // ============ Modals ============
   function openModal(id) { document.getElementById(id).classList.add("show"); }
