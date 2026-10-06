@@ -10,6 +10,8 @@ const { loginGuard, registerFailure, registerSuccess } = require("../middleware/
 const { requireAdmin } = require("../middleware/auth");
 const { logEvent } = require("../utils/audit");
 
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync("zeus-dummy-password", 12);
+
 const OTP_CHALLENGE_TTL_MS = 5 * 60 * 1000;
 const OTP_PENDING_SECRET_TTL_MS = 10 * 60 * 1000;
 const otpVerificationLock = { chain: Promise.resolve() };
@@ -41,7 +43,8 @@ router.post("/login", loginGuard("admin"), async (req, res) => {
   const admin = loadAdmin();
   if (!admin) return res.status(500).json({ error: "مدیر پنل ساخته نشده است" });
 
-  const ok = username === admin.username && (await bcrypt.compare(password, admin.passwordHash));
+  const passwordMatches = await bcrypt.compare(password, admin.passwordHash);
+  const ok = username === admin.username && passwordMatches;
   if (!ok) {
     registerFailure(req._loginGuardKey, req._loginGuardIpKey);
     return res.status(401).json({ error: "نام کاربری یا رمز عبور اشتباه است" });
@@ -72,7 +75,8 @@ router.post("/user-login", loginGuard("user"), async (req, res) => {
   const users = loadUsers();
   const user = users.find((u) => u.username === username);
 
-  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+  const passwordMatches = await bcrypt.compare(password, user?.passwordHash || DUMMY_PASSWORD_HASH);
+  if (!user || !passwordMatches) {
     registerFailure(req._loginGuardKey, req._loginGuardIpKey);
     return res.status(401).json({ error: "نام کاربری یا رمز عبور اشتباه است" });
   }
