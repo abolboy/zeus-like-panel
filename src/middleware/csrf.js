@@ -18,7 +18,7 @@ function csrfProtection(req, res, next) {
   if (!req.path.startsWith("/api")) return next();
   if (
     EXEMPT_PATHS.has(req.path) ||
-    req.path.startsWith("/api/agent/")
+    req.path === "/api/agent/usage"
   ) {
     return next();
   }

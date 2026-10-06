@@ -8,6 +8,7 @@ const { loadUsers, saveUsers, sanitizeServerIds } = require("../store/users");
 const { isValidExpiryFormat } = require("../utils/date");
 const { requireAdmin } = require("../middleware/auth");
 const { logEvent } = require("../utils/audit");
+const { isValidPassword, passwordError, BCRYPT_ROUNDS } = require("../utils/password-policy");
 
 router.get("/", requireAdmin, (req, res) => {
   const users = loadUsers().map(({ passwordHash, subToken, ...safe }) => safe);
@@ -26,8 +27,8 @@ router.post("/", requireAdmin, async (req, res) => {
     return res.status(400).json({ error: "فرمت تاریخ انقضا نامعتبر است (روز-ماه-سال، مثال: 31-12-2026)" });
   }
 
-  if (!username?.trim() || !password || String(password).length < 12 || String(password).length > 256) {
-    return res.status(400).json({ error: "نام کاربری و رمز عبور الزامی است و رمز باید بین ۱۲ تا ۲۵۶ کاراکتر باشد" });
+  if (!username?.trim() || !password || !isValidPassword(password)) {
+    return res.status(400).json({ error: passwordError() });
   }
   const users = loadUsers();
   if (users.some((u) => u.username === username.trim())) {
@@ -36,7 +37,7 @@ router.post("/", requireAdmin, async (req, res) => {
   const user = {
     id: Date.now().toString(),
     username: username.trim(),
-    passwordHash: await bcrypt.hash(password, 12),
+    passwordHash: await bcrypt.hash(password, BCRYPT_ROUNDS),
     authVersion: 0,
     expiry: expiry || "",
     traffic: trafficValue,
@@ -97,10 +98,10 @@ router.put("/:id", requireAdmin, async (req, res) => {
     }
   }
   if (req.body.password !== undefined) {
-    if (typeof req.body.password !== "string" || req.body.password.length < 12 || req.body.password.length > 256) {
-      return res.status(400).json({ error: "رمز باید بین ۱۲ تا ۲۵۶ کاراکتر باشد" });
+    if (!isValidPassword(req.body.password)) {
+      return res.status(400).json({ error: passwordError() });
     }
-    user.passwordHash = await bcrypt.hash(req.body.password, 12);
+    user.passwordHash = await bcrypt.hash(req.body.password, BCRYPT_ROUNDS);
     authChanged = true;
   }
   if (authChanged) user.authVersion = Number(user.authVersion || 0) + 1;

@@ -5,15 +5,14 @@ const router = express.Router();
 const { loadUsers, saveUsers, appendUserHistory } = require("../store/users");
 const { requireUser } = require("../middleware/auth");
 const { logEvent } = require("../utils/audit");
+const { isValidPassword, passwordError, BCRYPT_ROUNDS } = require("../utils/password-policy");
 
-function validPassword(value) {
-  return typeof value === "string" && value.length >= 12 && value.length <= 256;
-}
+function validPassword(value) { return isValidPassword(value); }
 
 router.post("/change-password", requireUser, async (req, res) => {
   const { currentPassword, newPassword } = req.body || {};
   if (!currentPassword || !validPassword(newPassword)) {
-    return res.status(400).json({ error: "رمز جدید باید حداقل ۱۲ و حداکثر ۲۵۶ کاراکتر باشد" });
+    return res.status(400).json({ error: passwordError() });
   }
 
   const users = loadUsers();
@@ -23,7 +22,7 @@ router.post("/change-password", requireUser, async (req, res) => {
     return res.status(401).json({ error: "رمز فعلی اشتباه است" });
   }
 
-  user.passwordHash = await bcrypt.hash(newPassword, 12);
+  user.passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
   user.authVersion = Number(user.authVersion || 0) + 1;
   appendUserHistory(user, "password_changed");
   await saveUsers(users);
