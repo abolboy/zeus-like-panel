@@ -45,8 +45,10 @@ router.post("/change-username", requireAdmin, async (req, res) => {
     return res.status(400).json({ error: "نام کاربری باید بین ۳ تا ۶۴ کاراکتر باشد" });
   }
   admin.username = username;
+  admin.authVersion = Number(admin.authVersion || 0) + 1;
   await atomicWrite(config.adminFile, admin);
   req.session.admin = admin.username;
+  req.session.authVersion = admin.authVersion;
   logEvent("admin.username_changed", admin.username, { success: true }, req);
   res.json({ ok: true, message: "نام کاربری مدیر با موفقیت تغییر کرد" });
 });
