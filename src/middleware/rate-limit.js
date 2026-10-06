@@ -5,7 +5,12 @@ const BLOCK_MS = 10 * 60 * 1000;
 
 function loginGuard(scope) {
   return (req, res, next) => {
-    const key = scope + ":" + req.ip + ":" + (req.body?.username || "");
+    const identity =
+      scope === "adminotp"
+        ? (req.session?.otpPending || req.body?.username || "")
+        : (req.body?.username || "");
+
+    const key = scope + ":" + req.ip + ":" + identity;
     const rec = attempts.get(key);
     const now = Date.now();
 
