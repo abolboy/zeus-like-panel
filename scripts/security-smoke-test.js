@@ -1,4 +1,5 @@
 const assert = require("assert");
+const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
@@ -49,6 +50,21 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     const tampered = JSON.parse(JSON.stringify(logs));
     tampered[0].event = "tampered";
     assert.throws(() => verifyLogs(tampered), /integrity check failed/);
+
+    const proxyNumeric = spawnSync(process.execPath, ["-e", "const c=require('./src/config'); process.stdout.write(String(c.trustProxy))"], {
+      cwd: config.rootDir,
+      env: { ...process.env, NODE_ENV: "test", SESSION_SECRET: "ci-test-session-secret", TRUST_PROXY: "2" },
+      encoding: "utf8",
+    });
+    assert.strictEqual(proxyNumeric.status, 0);
+    assert.strictEqual(proxyNumeric.stdout, "2");
+
+    const proxyInvalid = spawnSync(process.execPath, ["-e", "require('./src/config')"], {
+      cwd: config.rootDir,
+      env: { ...process.env, NODE_ENV: "test", SESSION_SECRET: "ci-test-session-secret", TRUST_PROXY: "not-a-valid-proxy" },
+      encoding: "utf8",
+    });
+    assert.notStrictEqual(proxyInvalid.status, 0);
 
     const usersSource = fs.readFileSync(path.join(config.rootDir, "src", "routes", "users.js"), "utf8");
     const backupSource = fs.readFileSync(path.join(config.rootDir, "src", "routes", "backup.js"), "utf8");
