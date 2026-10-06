@@ -97,7 +97,6 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
   } finally {
     Date.now = originalNow;
     void now;
-    void attempts;
   }
 })().catch((err) => {
   console.error(err);
