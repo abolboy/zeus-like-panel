@@ -31,48 +31,46 @@ jobs:
           node --check src/routes/auth.js
           node --check src/middleware/rate-limit.js
 
-      - name: TOTP RFC 6238 vectors
+      - name: TOTP verification vectors
         run: |
           node <<'NODE'
           const assert = require('assert');
-          const crypto = require('crypto');
           const totp = require('./src/utils/totp');
 
           const secret = '12345678901234567890';
-          const b32 = (() => {
-            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-            let bits = 0, value = 0, out = '';
-            for (const byte of Buffer.from(secret)) {
-              value = (value << 8) | byte;
-              bits += 8;
-              while (bits >= 5) {
-                out += alphabet[(value >>> (bits - 5)) & 31];
-                bits -= 5;
-              }
+          const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+          let bits = 0, value = 0, b32 = '';
+          for (const byte of Buffer.from(secret)) {
+            value = (value << 8) | byte;
+            bits += 8;
+            while (bits >= 5) {
+              b32 += alphabet[(value >>> (bits - 5)) & 31];
+              bits -= 5;
             }
-            if (bits) out += alphabet[(value << (5 - bits)) & 31];
-            return out;
-          })();
+          }
+          if (bits) b32 += alphabet[(value << (5 - bits)) & 31];
 
-          const expected = new Map([
-            [59, '94287082'],
-            [1111111109, '07081804'],
-            [1111111111, '14050471'],
-            [1234567890, '89005924'],
-            [2000000000, '69279037'],
-            [20000000000, '65353130'],
+          const expected6 = new Map([
+            [59, '287082'],
+            [1111111109, '081804'],
+            [1111111111, '050471'],
+            [1234567890, '05924'.padStart(6, '0')],
+            [2000000000, '279037'],
+            [20000000000, '353130'],
           ]);
 
           const originalNow = Date.now;
-          for (const [unix, code] of expected) {
-            Date.now = () => unix * 1000;
-            assert.strictEqual(totp.verify(b32, code), false);
+          try {
+            for (const [unix, code] of expected6) {
+              Date.now = () => unix * 1000;
+              assert.strictEqual(totp.verify(b32, code), true);
+            }
+          } finally {
+            Date.now = originalNow;
           }
-          Date.now = originalNow;
 
-          assert.strictEqual(typeof totp.generateSecret(), 'string');
           assert.ok(/^[A-Z2-7]{32}$/.test(totp.generateSecret()));
-          console.log('TOTP smoke checks passed');
+          console.log('TOTP verification vectors passed');
           NODE
 
       - name: Dependency audit
