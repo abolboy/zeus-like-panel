@@ -56,6 +56,7 @@ router.post("/login", loginGuard("admin"), async (req, res) => {
   req.session.regenerate((err) => {
     if (err) return res.status(500).json({ error: "خطای سرور" });
     req.session.admin = username;
+    req.session.authVersion = Number(admin.authVersion || 0);
     logEvent("admin.login", username, { success: true }, req);
     if (rememberMe) req.session.cookie.maxAge = config.rememberMeMaxAge;
     res.json({ success: true, ok: true });
@@ -90,6 +91,7 @@ router.post("/user-login", loginGuard("user"), async (req, res) => {
   req.session.regenerate((err) => {
     if (err) return res.status(500).json({ error: "خطای سرور" });
     req.session.userId = user.id;
+    req.session.authVersion = Number(user.authVersion || 0);
     try {
       const { loadUsers, saveUsers } = require("../store/users");
       const usList = loadUsers();
@@ -170,7 +172,9 @@ router.post("/login/otp", loginGuard("adminotp"), async (req, res) => {
   delete req.session.otpPendingExpiresAt;
   req.session.regenerate((err) => {
     if (err) return res.status(500).json({ error: "خطای سرور" });
+    const currentAdmin = loadAdmin();
     req.session.admin = pending;
+    req.session.authVersion = Number(currentAdmin?.authVersion || 0);
     logOtpEvent("otp.login.success", pending, { success: true }, req);
     res.json({ success: true, ok: true });
   });
