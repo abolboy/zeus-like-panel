@@ -26,8 +26,8 @@ router.post("/", requireAdmin, async (req, res) => {
     return res.status(400).json({ error: "فرمت تاریخ انقضا نامعتبر است (روز-ماه-سال، مثال: 31-12-2026)" });
   }
 
-  if (!username?.trim() || !password) {
-    return res.status(400).json({ error: "نام کاربری و رمز عبور الزامی است" });
+  if (!username?.trim() || !password || String(password).length < 12 || String(password).length > 256) {
+    return res.status(400).json({ error: "نام کاربری و رمز عبور الزامی است و رمز باید بین ۱۲ تا ۲۵۶ کاراکتر باشد" });
   }
   const users = loadUsers();
   if (users.some((u) => u.username === username.trim())) {
@@ -37,6 +37,7 @@ router.post("/", requireAdmin, async (req, res) => {
     id: Date.now().toString(),
     username: username.trim(),
     passwordHash: await bcrypt.hash(password, 12),
+    authVersion: 0,
     expiry: expiry || "",
     traffic: trafficValue,
     serverIds: sanitizeServerIds(req.body.serverIds),
@@ -90,7 +91,13 @@ router.put("/:id", requireAdmin, async (req, res) => {
       return res.status(400).json({ error: "وضعیت فعال باید true یا false باشد" });
     }
   }
-  if (req.body.password) user.passwordHash = await bcrypt.hash(req.body.password, 12);
+  if (req.body.password !== undefined) {
+    if (typeof req.body.password !== "string" || req.body.password.length < 12 || req.body.password.length > 256) {
+      return res.status(400).json({ error: "رمز باید بین ۱۲ تا ۲۵۶ کاراکتر باشد" });
+    }
+    user.passwordHash = await bcrypt.hash(req.body.password, 12);
+    user.authVersion = Number(user.authVersion || 0) + 1;
+  }
   if (req.body.serverIds !== undefined) {
     user.serverIds = sanitizeServerIds(req.body.serverIds);
   }
@@ -106,6 +113,7 @@ router.delete("/:id", requireAdmin, async (req, res) => {
   const remaining = users.filter((u) => String(u.id) !== String(req.params.id));
   if (remaining.length === users.length) return res.status(404).json({ error: "کاربر پیدا نشد" });
   await saveUsers(remaining);
+  logEvent("user.delete", req.session.admin, { userId: String(req.params.id) }, req);
   res.json({ ok: true });
 });
 
@@ -115,6 +123,7 @@ router.post("/:id/toggle", requireAdmin, async (req, res) => {
   if (!user) return res.status(404).json({ error: "کاربر پیدا نشد" });
   user.active = !user.active;
   await saveUsers(users);
+  logEvent("user.toggle", req.session.admin, { userId: String(req.params.id), active: user.active }, req);
   res.json({ ok: true, active: user.active });
 });
 
