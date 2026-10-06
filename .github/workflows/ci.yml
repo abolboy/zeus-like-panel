@@ -30,6 +30,20 @@ jobs:
           find src -type f -name "*.js" -print0 | xargs -0 -n1 node --check
           node --check server.js
 
+      - name: Dashboard inline JavaScript syntax
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const vm = require('vm');
+          const html = fs.readFileSync('dashboard.html', 'utf8');
+          const scripts = [...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)]
+            .map((m) => m[1].trim())
+            .filter(Boolean);
+          if (!scripts.length) throw new Error('No inline scripts found in dashboard.html');
+          scripts.forEach((source, index) => new vm.Script(source, { filename: `dashboard-inline-${index + 1}.js` }));
+          console.log(`Dashboard inline JavaScript syntax passed (${scripts.length} scripts)`);
+          NODE
+
       - name: TOTP verification vectors
         run: |
           node <<'NODE'
