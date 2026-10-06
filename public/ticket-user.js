@@ -56,7 +56,7 @@
 
   function sendMsg() {
     var ta = document.getElementById("zexTicketText");
-    var text = ta.value.trim();
+    var text = String(ta && ta.value || "").trim();
     if (!text) return;
     fetch("/api/tickets", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: text }) })
       .then(function (r) { return r.json(); })
