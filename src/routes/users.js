@@ -10,7 +10,7 @@ const { requireAdmin } = require("../middleware/auth");
 const { logEvent } = require("../utils/audit");
 
 router.get("/", requireAdmin, (req, res) => {
-  const users = loadUsers().map(({ passwordHash, ...safe }) => safe);
+  const users = loadUsers().map(({ passwordHash, subToken, ...safe }) => safe);
   res.json(users);
 });
 
@@ -128,6 +128,7 @@ router.post("/:id/toggle", requireAdmin, async (req, res) => {
   const user = users.find((u) => String(u.id) === String(req.params.id));
   if (!user) return res.status(404).json({ error: "کاربر پیدا نشد" });
   user.active = !user.active;
+  user.authVersion = Number(user.authVersion || 0) + 1;
   await saveUsers(users);
   logEvent("user.toggle", req.session.admin, { userId: String(req.params.id), active: user.active }, req);
   res.json({ ok: true, active: user.active });
@@ -135,7 +136,7 @@ router.post("/:id/toggle", requireAdmin, async (req, res) => {
 
 
 router.get("/export", requireAdmin, (req, res) => {
-  const users = loadUsers().map(({ passwordHash, ...safe }) => safe);
+  const users = loadUsers().map(({ passwordHash, subToken, ...safe }) => safe);
   res.setHeader("Content-Disposition", 'attachment; filename="zeus-users-' + Date.now() + '.json"');
   res.json({ exportedAt: new Date().toISOString(), users });
 });
@@ -154,9 +155,11 @@ router.post("/import", requireAdmin, async (req, res) => {
       id: String(item.id || Date.now() + Math.random()),
       username,
       passwordHash: String(item.passwordHash),
-      authVersion: Number(item.authVersion) || 0,
+      authVersion: Number.isSafeInteger(Number(item.authVersion)) && Number(item.authVersion) >= 0
+        ? Number(item.authVersion)
+        : 0,
       expiry: item.expiry || "",
-      traffic: Number(item.traffic) || 0,
+      traffic: Number.isFinite(Number(item.traffic)) && Number(item.traffic) >= 0 ? Number(item.traffic) : 0,
       serverIds: sanitizeServerIds(item.serverIds),
       renewalRequested: item.renewalRequested || null,
       active: item.active !== false,
@@ -205,8 +208,8 @@ router.post("/bulk", requireAdmin, (req, res) => {
   usernames.forEach(function (name) {
     const u = users.find(x => x.username === name);
     if (!u) return;
-    if (action === "activate") { u.active = true; changed++; }
-    else if (action === "deactivate") { u.active = false; changed++; }
+    if (action === "activate") { u.active = true; u.authVersion = Number(u.authVersion || 0) + 1; changed++; }
+    else if (action === "deactivate") { u.active = false; u.authVersion = Number(u.authVersion || 0) + 1; changed++; }
     else if (action === "delete") { users.splice(users.indexOf(u), 1); changed++; }
   });
   saveUsers(users);

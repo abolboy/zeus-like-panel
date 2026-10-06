@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const router = express.Router();
 const { loadUsers, saveUsers } = require("../store/users");
 const { loadServers } = require("../store/servers");
+const { safeEqualText } = require("../utils/crypto");
 const { isExpired } = require("../utils/date");
 const { requireUserOrAdmin } = require("../middleware/auth");
 
@@ -83,7 +84,7 @@ router.get("/qrlink/:username/:idx", requireUserOrAdmin, async (req, res) => {
 
 router.get("/b64/:username", (req, res) => {
   const user = loadUsers().find((u) => u.username === req.params.username);
-  if (!user || !user.subToken || user.subToken !== String(req.query.token || "")) {
+  if (!user || !user.subToken || !safeEqualText(user.subToken, String(req.query.token || ""))) {
     return res.status(403).send("Forbidden");
   }
   const links = buildConfigs(user).map((c) => c.link);
@@ -92,6 +93,8 @@ router.get("/b64/:username", (req, res) => {
   const totB = Math.round((Number(user.traffic) || 0) * 1073741824);
   const p = String(user.expiry || "").split("-").map(Number);
   const exp = p.length === 3 ? Math.floor(new Date(p[2], p[1] - 1, p[0]).getTime() / 1000) : 0;
+  res.set("Cache-Control", "no-store");
+  res.set("Referrer-Policy", "no-referrer");
   res.set("content-type", "text/plain; charset=utf-8");
   res.set("profile-update-interval", "12");
   res.set("subscription-userinfo", "upload=0; download=" + usedB + "; total=" + totB + "; expire=" + exp);

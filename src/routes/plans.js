@@ -16,9 +16,11 @@ router.get("/", requireAdmin, (req, res) => {
 router.post("/", requireAdmin, (req, res) => {
   const b = req.body || {};
   const name = String(b.name || "").trim();
-  const days = Number(b.days) || 0;
-  const traffic = Number(b.traffic) || 0;
-  if (!name || days <= 0) return res.status(400).json({ error: "نام و تعداد روز معتبر لازم است" });
+  const days = Number(b.days);
+  const traffic = Number(b.traffic);
+  if (!name || !Number.isInteger(days) || days < 1 || days > 3650 || !Number.isFinite(traffic) || traffic < 0 || traffic > 1000000) {
+    return res.status(400).json({ error: "نام، تعداد روز و حجم ترافیک معتبر لازم است" });
+  }
   const list = load();
   list.push({ id: "p" + Date.now().toString(36), name: name, days: days, traffic: traffic });
   save(list);
