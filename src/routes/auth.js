@@ -43,7 +43,7 @@ router.post("/login", loginGuard("admin"), async (req, res) => {
 
   const ok = username === admin.username && (await bcrypt.compare(password, admin.passwordHash));
   if (!ok) {
-    registerFailure(req._loginGuardKey);
+    registerFailure(req._loginGuardKey, req._loginGuardIpKey);
     return res.status(401).json({ error: "نام کاربری یا رمز عبور اشتباه است" });
   }
 
@@ -52,7 +52,7 @@ router.post("/login", loginGuard("admin"), async (req, res) => {
     req.session.otpPendingExpiresAt = Date.now() + OTP_CHALLENGE_TTL_MS;
     return res.json({ otpRequired: true });
   }
-  registerSuccess(req._loginGuardKey);
+  registerSuccess(req._loginGuardKey, req._loginGuardIpKey);
   req.session.regenerate((err) => {
     if (err) return res.status(500).json({ error: "خطای سرور" });
     req.session.admin = username;
@@ -73,7 +73,7 @@ router.post("/user-login", loginGuard("user"), async (req, res) => {
   const user = users.find((u) => u.username === username);
 
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
-    registerFailure(req._loginGuardKey);
+    registerFailure(req._loginGuardKey, req._loginGuardIpKey);
     return res.status(401).json({ error: "نام کاربری یا رمز عبور اشتباه است" });
   }
   if (!user.active) {
@@ -87,7 +87,7 @@ router.post("/user-login", loginGuard("user"), async (req, res) => {
     });
   }
 
-  registerSuccess(req._loginGuardKey);
+  registerSuccess(req._loginGuardKey, req._loginGuardIpKey);
   req.session.regenerate((err) => {
     if (err) return res.status(500).json({ error: "خطای سرور" });
     req.session.userId = user.id;
@@ -133,7 +133,7 @@ router.post("/login/otp", loginGuard("adminotp"), async (req, res) => {
   const admin = loadAdmin();
   const code = String((req.body && req.body.code) || "").trim();
   if (!admin || !admin.otpEnabled || !admin.otpSecret) {
-    registerFailure(req._loginGuardKey);
+    registerFailure(req._loginGuardKey, req._loginGuardIpKey);
     logOtpEvent("otp.login.failure", pending, { reason: "otp_not_configured" }, req);
     return res.status(401).json({ error: "کد معتبر نیست" });
   }
@@ -156,18 +156,18 @@ router.post("/login/otp", loginGuard("adminotp"), async (req, res) => {
     }));
 
   if (result.kind === "invalid") {
-    registerFailure(req._loginGuardKey);
+    registerFailure(req._loginGuardKey, req._loginGuardIpKey);
     logOtpEvent("otp.login.failure", pending, { reason: "invalid_code" }, req);
     return res.status(401).json({ error: "کد معتبر نیست" });
   }
 
   if (result.kind === "replay") {
-    registerFailure(req._loginGuardKey);
+    registerFailure(req._loginGuardKey, req._loginGuardIpKey);
     logOtpEvent("otp.login.replay_rejected", pending, { reason: "counter_already_used" }, req);
     return res.status(401).json({ error: "این کد قبلاً استفاده شده است" });
   }
 
-  registerSuccess(req._loginGuardKey);
+  registerSuccess(req._loginGuardKey, req._loginGuardIpKey);
   req.session.otpPending = null;
   delete req.session.otpPendingExpiresAt;
   req.session.regenerate((err) => {
