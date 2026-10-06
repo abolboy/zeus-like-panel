@@ -1,5 +1,5 @@
 
-const CACHE = "zex-cache-v3";
+const CACHE = "zex-cache-v4";
 const CORE = ["/assets/manifest.json", "/assets/icon-192.png"];
 
 self.addEventListener("install", function (e) {
