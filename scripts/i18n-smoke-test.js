@@ -75,5 +75,5 @@ const userHtml = fs.readFileSync("sub.html", "utf8");
 assert.ok(userHtml.includes('/assets/zex-i18n.js?v=3'), "user dashboard must load zex-i18n v3");
 const admin = fs.readFileSync("dashboard.html", "utf8");
 assert.ok(admin.includes('minlength="12"'), "admin password UI must require 12 characters");
-assert.ok(admin.includes("رمز عبور جدید (حداقل ۱۲ کاراکتر)"), "admin password label is stale");
+assert.ok(admin.includes("رمز عبور جدید (۱۲ تا ۷۲ بایت UTF-8)"), "admin password label is stale");
 console.log("SETTINGS_AND_USER_I18N_OK");
