@@ -3,13 +3,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 
-function requireUser(req, res, next) {
-  if (req.session && (req.session.username || req.session.user)) {
-    req.username = req.session.username || req.session.user.username;
-    return next();
-  }
-  return res.status(401).json({ error: "ورود کاربر لازم است" });
-}
+const { requireUser } = require("../middleware/auth");
 
 const router = express.Router();
 
