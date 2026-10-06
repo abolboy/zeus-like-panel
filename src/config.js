@@ -21,7 +21,7 @@ const config = {
     const raw = String(process.env.TRUST_PROXY ?? "").trim().toLowerCase();
     if (!raw || raw === "false" || raw === "off" || raw === "no") return false;
     if (raw === "true" || raw === "on" || raw === "yes") return true;
-    if (/^\\d+$/.test(raw)) return Number(raw);
+    if (/^\d+$/.test(raw)) return Number(raw);
     if (/^(?:[a-f0-9:]+|[a-z0-9.-]+)$/.test(raw)) return raw;
     throw new Error("TRUST_PROXY نامعتبر است");
   })(),
