@@ -40,6 +40,8 @@ jobs:
             .map((m) => m[1].trim())
             .filter(Boolean);
           if (!scripts.length) throw new Error('No inline scripts found in dashboard.html');
+          if (!html.includes('class="mobile-nav"')) throw new Error('Mobile SPA navigation is missing');
+          if (!html.includes('document.querySelectorAll(".nav button, .mobile-nav button")')) throw new Error('SPA navigation binding is incomplete');
           scripts.forEach((source, index) => new vm.Script(source, { filename: `dashboard-inline-${index + 1}.js` }));
           console.log(`Dashboard inline JavaScript syntax passed (${scripts.length} scripts)`);
           NODE
