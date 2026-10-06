@@ -788,7 +788,7 @@
 
   let activeSpaRoute = "";
 
-  document.querySelectorAll(".nav button").forEach(btn => {
+  document.querySelectorAll(".nav button, .mobile-nav button").forEach(btn => {
     btn.addEventListener("click", () => navigateSpa(btn.dataset.tab));
   });
 
@@ -815,7 +815,7 @@
   function renderSpaRoute(route = getSpaRoute()) {
     const view = SPA_ROUTES[route] || SPA_ROUTES.users;
     if (activeSpaRoute === route) {
-      document.querySelectorAll(".nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === view.tab));
+      document.querySelectorAll(".nav button, .mobile-nav button").forEach(b => b.classList.toggle("active", b.dataset.tab === view.tab));
       return;
     }
 
@@ -825,7 +825,7 @@
     if (!tab) return;
     tab.classList.add("active");
 
-    document.querySelectorAll(".nav button").forEach(b => {
+    document.querySelectorAll(".nav button, .mobile-nav button").forEach(b => {
       b.classList.toggle("active", b.dataset.tab === view.tab);
       b.setAttribute("aria-current", b.dataset.tab === view.tab ? "page" : "false");
     });
