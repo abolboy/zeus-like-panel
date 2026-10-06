@@ -72,6 +72,9 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     const subSource = fs.readFileSync(path.join(config.rootDir, "src", "routes", "subscription.js"), "utf8");
     const appSource = fs.readFileSync(path.join(config.rootDir, "src", "app.js"), "utf8");
     const loggerSource = fs.readFileSync(path.join(config.rootDir, "src", "middleware", "request-logger.js"), "utf8");
+    const securitySource = fs.readFileSync(path.join(config.rootDir, "src", "middleware", "security.js"), "utf8");
+    const csrfSource = fs.readFileSync(path.join(config.rootDir, "src", "middleware", "csrf.js"), "utf8");
+    const passwordPolicy = require(path.join(config.rootDir, "src", "utils", "password-policy"));
 
     assert.match(usersSource, /user\.authVersion = Number\(user\.authVersion \|\| 0\) \+ 1;/);
     assert.match(usersSource, /\{ passwordHash, subToken, \.\.\.safe \}/);
