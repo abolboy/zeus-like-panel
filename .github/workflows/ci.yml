@@ -1,0 +1,77 @@
+name: Zeus Panel CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: JavaScript syntax
+        run: |
+          node --check src/utils/totp.js
+          node --check src/routes/auth.js
+          node --check src/middleware/rate-limit.js
+
+      - name: TOTP verification vectors
+        run: |
+          node <<'NODE'
+          const assert = require('assert');
+          const totp = require('./src/utils/totp');
+
+          const secret = '12345678901234567890';
+          const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+          let bits = 0, value = 0, b32 = '';
+          for (const byte of Buffer.from(secret)) {
+            value = (value << 8) | byte;
+            bits += 8;
+            while (bits >= 5) {
+              b32 += alphabet[(value >>> (bits - 5)) & 31];
+              bits -= 5;
+            }
+          }
+          if (bits) b32 += alphabet[(value << (5 - bits)) & 31];
+
+          const expected6 = new Map([
+            [59, '287082'],
+            [1111111109, '081804'],
+            [1111111111, '050471'],
+            [1234567890, '05924'.padStart(6, '0')],
+            [2000000000, '279037'],
+            [20000000000, '353130'],
+          ]);
+
+          const originalNow = Date.now;
+          try {
+            for (const [unix, code] of expected6) {
+              Date.now = () => unix * 1000;
+              assert.strictEqual(totp.verify(b32, code), true);
+            }
+          } finally {
+            Date.now = originalNow;
+          }
+
+          assert.ok(/^[A-Z2-7]{32}$/.test(totp.generateSecret()));
+          console.log('TOTP verification vectors passed');
+          NODE
+
+      - name: Dependency audit
+        run: npm audit --omit=dev
