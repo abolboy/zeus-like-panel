@@ -90,8 +90,8 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     assert.ok(csrfSource.includes('req.path === "/api/agent/usage"'));
     assert.strictEqual(passwordPolicy.isValidPassword("A".repeat(12)), true);
     assert.strictEqual(passwordPolicy.isValidPassword("A".repeat(73)), false);
-    assert.strictEqual(passwordPolicy.isValidPassword("ا".repeat(18)), true);
-    assert.strictEqual(passwordPolicy.isValidPassword("ا".repeat(19)), false);
+    assert.strictEqual(passwordPolicy.isValidPassword("ا".repeat(36)), true);
+    assert.strictEqual(passwordPolicy.isValidPassword("ا".repeat(37)), false);
 
     const createApp = require("../src/app");
     const app = createApp();
