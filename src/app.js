@@ -32,6 +32,7 @@ function safeSendFile(res, filePath, label) {
 
 function createApp() {
   const app = express();
+  app.set("trust proxy", config.trustProxy);
 
   app.disable("x-powered-by");
   app.use(securityHeaders);
