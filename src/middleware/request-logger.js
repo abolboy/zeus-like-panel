@@ -6,7 +6,7 @@ function requestLogger(req, res, next) {
   res.on("finish", () => {
     logger.info("http", {
       method: req.method,
-      url: req.originalUrl,
+      url: req.path,
       status: res.statusCode,
       ms: Date.now() - startedAt,
       ip: req.ip,
