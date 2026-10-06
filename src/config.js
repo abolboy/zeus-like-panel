@@ -17,7 +17,14 @@ const config = {
     return secret || "zeus-panel-local-secret-change-me";
   })(),
   sessionCookieName: "zeus.sid",
-  trustProxy: process.env.TRUST_PROXY ? (Number.isNaN(Number(process.env.TRUST_PROXY)) ? process.env.TRUST_PROXY : Number(process.env.TRUST_PROXY)) : false,
+  trustProxy: (() => {
+    const raw = String(process.env.TRUST_PROXY ?? "").trim().toLowerCase();
+    if (!raw || raw === "false" || raw === "off" || raw === "no") return false;
+    if (raw === "true" || raw === "on" || raw === "yes") return true;
+    if (/^\\d+$/.test(raw)) return Number(raw);
+    if (/^(?:[a-f0-9:]+|[a-z0-9.-]+)$/.test(raw)) return raw;
+    throw new Error("TRUST_PROXY نامعتبر است");
+  })(),
   sessionMaxAge: 24 * 60 * 60 * 1000,
   rememberMeMaxAge: 30 * 24 * 60 * 60 * 1000,
   rootDir: __dirname + "/..",
