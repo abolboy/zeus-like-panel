@@ -17,6 +17,7 @@ const config = {
     return secret || "zeus-panel-local-secret-change-me";
   })(),
   sessionCookieName: "zeus.sid",
+  trustProxy: process.env.TRUST_PROXY ? (Number.isNaN(Number(process.env.TRUST_PROXY)) ? process.env.TRUST_PROXY : Number(process.env.TRUST_PROXY)) : false,
   sessionMaxAge: 24 * 60 * 60 * 1000,
   rememberMeMaxAge: 30 * 24 * 60 * 60 * 1000,
   rootDir: __dirname + "/..",

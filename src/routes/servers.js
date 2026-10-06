@@ -9,6 +9,7 @@ const { loadUsers, saveUsers } = require("../store/users");
 const { requireAdmin } = require("../middleware/auth");
 const config = require("../config");
 const logger = require("../logger");
+const { logEvent } = require("../utils/audit");
 
 function appendAudit(event, req, meta = {}) {
   logger.info("audit", {
@@ -33,10 +34,10 @@ router.get("/:id/agent-token", requireAdmin, async (req, res) => {
   server.agentTokenCreatedAt = new Date().toISOString();
 
   await saveServers(servers);
-  appendAudit("xray_agent_token_created", req, {
+  logEvent("server.agent_token_created", req.session.admin, {
     serverId: server.id,
     name: server.name,
-  });
+  }, req);
 
   res.json({
     ok: true,
@@ -71,6 +72,7 @@ router.post("/", requireAdmin, async (req, res) => {
   };
   servers.push(server);
   await saveServers(servers);
+  logEvent("server.create", req.session.admin, { serverId: server.id, name: server.name }, req);
   res.json(server);
 });
 
@@ -109,6 +111,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
 
   servers[index] = server;
   await saveServers(servers);
+  logEvent("server.update", req.session.admin, { serverId: String(req.params.id) }, req);
   res.json({ ok: true });
 });
 
@@ -118,6 +121,7 @@ router.post("/:id/toggle", requireAdmin, async (req, res) => {
   if (!server) return res.status(404).json({ error: "سرور پیدا نشد" });
   server.active = !server.active;
   await saveServers(servers);
+  logEvent("server.toggle", req.session.admin, { serverId: String(req.params.id), active: server.active }, req);
   res.json({ ok: true, active: server.active });
 });
 
@@ -126,6 +130,7 @@ router.delete("/:id", requireAdmin, async (req, res) => {
   const remaining = servers.filter((s) => String(s.id) !== String(req.params.id));
   if (remaining.length === servers.length) return res.status(404).json({ error: "سرور پیدا نشد" });
   await saveServers(remaining);
+  logEvent("server.delete", req.session.admin, { serverId: String(req.params.id) }, req);
   res.json({ ok: true });
 });
 

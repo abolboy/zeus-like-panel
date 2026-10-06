@@ -1,22 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const { requireAdmin } = require("../middleware/auth");
-const { loadLogs } = require("../utils/audit");
+const { loadLogs, logEvent } = require("../utils/audit");
 
 router.get("/", requireAdmin, (req, res) => {
-  const logs = loadLogs();
-  const limit = Math.min(parseInt(req.query.limit) || 100, 500);
-  const recent = logs.slice(-limit).reverse();
-  res.json({ logs: recent, total: logs.length });
+  try {
+    const logs = loadLogs();
+    const requested = Number.parseInt(req.query.limit, 10);
+    const limit = Number.isFinite(requested) ? Math.min(Math.max(requested, 1), 500) : 100;
+    const recent = logs.slice(-limit).reverse();
+    res.json({ logs: recent, total: logs.length, integrity: "verified" });
+  } catch {
+    res.status(500).json({ error: "یکپارچگی لاگ حسابرسی تأیید نشد" });
+  }
 });
 
 router.delete("/", requireAdmin, (req, res) => {
-  const fs = require("fs");
-  const path = require("path");
-  const config = require("../config");
-  const logPath = path.join(config.dataDir, "audit-log.json");
-  fs.writeFileSync(logPath, "[]");
-  res.json({ ok: true });
+  logEvent("audit.delete.rejected", req.session.admin, { reason: "immutable_audit_policy" }, req);
+  res.status(405).json({ error: "حذف لاگ‌های حسابرسی مجاز نیست" });
 });
 
 module.exports = router;
