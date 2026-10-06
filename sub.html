@@ -1,7 +1,135 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<style id="zex-base-styles">
+
+<style id="zeus-user-pro-ui">
+  :root{
+    --u-bg:#070a12; --u-panel:rgba(14,18,32,.78); --u-panel2:rgba(19,24,41,.82);
+    --u-border:rgba(255,255,255,.07); --u-text:#eef1f8; --u-muted:#8d96ad;
+    --u-gold:#f2b705; --u-green:#35d68f; --u-red:#ff5c72; --u-shadow:0 18px 55px rgba(0,0,0,.28);
+  }
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(900px 500px at 85% -10%,rgba(242,183,5,.09),transparent 60%),
+      radial-gradient(700px 450px at 8% 100%,rgba(75,95,180,.10),transparent 62%),
+      var(--u-bg) !important;
+    color:var(--u-text) !important;
+    font-family:'Vazirmatn','Segoe UI',Tahoma,sans-serif !important;
+    min-height:100vh;
+    padding:0 !important;
+  }
+  #udContent,#udRoot{
+    width:min(1120px,calc(100% - 28px)) !important;
+    max-width:1120px !important;
+    margin-inline:auto !important;
+  }
+  #udContent{padding:26px 0 8px !important;}
+  #udRoot{padding:8px 0 92px !important;}
+  #udRoot > *{
+    position:relative;
+    background:var(--u-panel) !important;
+    border:1px solid var(--u-border) !important;
+    border-radius:18px !important;
+    box-shadow:var(--u-shadow) !important;
+    backdrop-filter:blur(16px) !important;
+    -webkit-backdrop-filter:blur(16px) !important;
+  }
+  #udRoot h1,#udRoot h2,#udRoot h3,#udRoot h4{
+    color:var(--u-text) !important;
+    letter-spacing:-.02em;
+  }
+  #udRoot h1{font-size:clamp(21px,3vw,30px) !important;}
+  #udRoot h2{font-size:20px !important;}
+  #udRoot h3{font-size:16px !important;}
+  #udRoot p,#udRoot small,.ud-muted{color:var(--u-muted) !important;}
+  #udRoot a{color:var(--u-gold) !important;}
+  #udRoot button,.ud-btn{
+    min-height:42px !important;
+    border-radius:11px !important;
+    border:1px solid var(--u-border) !important;
+    background:var(--u-panel2) !important;
+    color:var(--u-text) !important;
+    font-family:inherit !important;
+    font-weight:700 !important;
+    transition:transform .15s ease,border-color .15s ease,filter .15s ease,box-shadow .15s ease !important;
+  }
+  #udRoot button:hover,.ud-btn:hover{
+    border-color:rgba(242,183,5,.35) !important;
+    color:var(--u-gold) !important;
+    transform:translateY(-1px);
+  }
+  #udRoot input,#udRoot select,#udRoot textarea{
+    width:100%;
+    min-height:42px;
+    border-radius:11px !important;
+    border:1px solid var(--u-border) !important;
+    background:rgba(7,10,18,.72) !important;
+    color:var(--u-text) !important;
+    outline:none;
+    font-family:inherit !important;
+  }
+  #udRoot input:focus,#udRoot select:focus,#udRoot textarea:focus{
+    border-color:rgba(242,183,5,.65) !important;
+    box-shadow:0 0 0 3px rgba(242,183,5,.10) !important;
+  }
+  #udRoot table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:12px;}
+  #udRoot th{
+    background:rgba(19,24,41,.7) !important;
+    color:var(--u-muted) !important;
+    font-size:11px;
+  }
+  #udRoot td,#udRoot th{padding:11px 12px !important;border-color:var(--u-border) !important;}
+  #udRoot .ud-glass{
+    background:linear-gradient(145deg,rgba(18,24,42,.86),rgba(10,14,25,.74)) !important;
+    border-color:rgba(242,183,5,.12) !important;
+  }
+  #udRoot .ud-btn-gold{
+    background:linear-gradient(135deg,#f2b705,#f59e0b) !important;
+    color:#1a1204 !important;
+    border:0 !important;
+    box-shadow:0 8px 24px rgba(242,183,5,.18) !important;
+  }
+  #udRoot .ud-actions{gap:12px !important;}
+  #udRoot .ud-head{padding-bottom:4px;}
+  #udRoot img{max-width:100%;height:auto;border-radius:14px;}
+  .zeus-user-bar{
+    width:min(1120px,calc(100% - 28px));
+    margin:18px auto 0;
+    padding:13px 16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:rgba(14,18,32,.78);
+    border:1px solid var(--u-border);
+    border-radius:16px;
+    box-shadow:0 12px 35px rgba(0,0,0,.22);
+    backdrop-filter:blur(16px);
+  }
+  .zeus-user-dot{
+    width:10px;height:10px;border-radius:50%;background:var(--u-green);
+    box-shadow:0 0 0 5px rgba(53,214,143,.10),0 0 16px rgba(53,214,143,.35);
+    flex:0 0 auto;
+  }
+  .zeus-user-bar strong{font-size:14px;}
+  .zeus-user-bar span{color:var(--u-muted);font-size:11px;margin-inline-start:auto;}
+  @media(max-width:760px){
+    #udContent,#udRoot{width:min(100% - 18px,680px) !important;}
+    #udContent{padding-top:12px !important;}
+    #udRoot{padding-bottom:84px !important;}
+    #udRoot > *{border-radius:15px !important;}
+    #udRoot .ud-actions{grid-template-columns:1fr !important;}
+    #udRoot .ud-btnrow{flex-direction:column !important;}
+    #udRoot table{font-size:12px;}
+    #udRoot td,#udRoot th{padding:9px 8px !important;}
+    .zeus-user-bar{width:calc(100% - 18px);margin-top:10px;padding:11px 13px;}
+    .zeus-user-bar span{font-size:10px;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001s !important;transition-duration:.001s !important;scroll-behavior:auto !important;}
+  }
+</style>
+\n<style id="zex-base-styles">
   .ud-glass {
     background: rgba(15, 20, 35, 0.6) !important;
     backdrop-filter: blur(20px) !important;

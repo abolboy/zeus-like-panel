@@ -36,12 +36,14 @@ jobs:
           const fs = require('fs');
           const vm = require('vm');
           const html = fs.readFileSync('dashboard.html', 'utf8');
-          const scripts = [...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)]
+          const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)]
             .map((m) => m[1].trim())
             .filter(Boolean);
           if (!scripts.length) throw new Error('No inline scripts found in dashboard.html');
           if (!html.includes('class="mobile-nav"')) throw new Error('Mobile SPA navigation is missing');
           if (!html.includes('document.querySelectorAll(".nav button, .mobile-nav button")')) throw new Error('SPA navigation binding is incomplete');
+          const userHtml = fs.readFileSync('sub.html', 'utf8');\n          if (!userHtml.includes('id="zeus-user-pro-ui"')) throw new Error('User dashboard professional UI is missing');
+          if (!userHtml.includes('class="zeus-user-bar"')) throw new Error('User dashboard status bar is missing');
           scripts.forEach((source, index) => new vm.Script(source, { filename: `dashboard-inline-${index + 1}.js` }));
           console.log(`Dashboard inline JavaScript syntax passed (${scripts.length} scripts)`);
           NODE
