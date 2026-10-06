@@ -9,6 +9,10 @@ const file = path.join(config.rootDir, "data", "tickets.json");
 function load() { try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch (e) { return []; } }
 function save(list) { fs.writeFileSync(file, JSON.stringify(list, null, 2)); }
 function now() { return new Date().toISOString(); }
+function getMessageText(req) {
+  const body = req.body && typeof req.body === "object" ? req.body : {};
+  return String(body.text ?? body.message ?? body.content ?? "").trim();
+}
 function tgNotify(text) {
   const token = process.env.TG_BOT_TOKEN, admin = process.env.TG_ADMIN_ID;
   if (!token || !admin) return;
@@ -19,7 +23,7 @@ function tgNotify(text) {
 }
 
 router.post("/", requireUser, (req, res) => {
-  const text = String((req.body && req.body.text) || "").trim();
+  const text = getMessageText(req);
   if (!text) return res.status(400).json({ error: "متن خالی است" });
   const list = load();
   const username = req.session.username;
