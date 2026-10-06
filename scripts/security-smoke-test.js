@@ -83,7 +83,15 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     assert.match(subSource, /safeEqualText\(user\.subToken/);
     assert.match(subSource, /Cache-Control.*no-store/);
     assert.match(appSource, /express\.json\(\{ limit: "100kb", inflate: false \}\)/);
-    assert.match(loggerSource, /url: req\.path/);
+    assert.match(loggerSource, /url: req\\.path/);
+    assert.match(securitySource, /Permissions-Policy/);
+    assert.match(securitySource, /Strict-Transport-Security/);
+    assert.match(securitySource, /fonts\\.googleapis\\.com/);
+    assert.match(csrfSource, /req\\.path === "\\/api\\/agent\\/usage"/);
+    assert.strictEqual(passwordPolicy.isValidPassword("A".repeat(12)), true);
+    assert.strictEqual(passwordPolicy.isValidPassword("A".repeat(73)), false);
+    assert.strictEqual(passwordPolicy.isValidPassword("ا".repeat(18)), true);
+    assert.strictEqual(passwordPolicy.isValidPassword("ا".repeat(19)), false);
 
     const createApp = require("../src/app");
     const app = createApp();
