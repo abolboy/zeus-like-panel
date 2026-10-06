@@ -40,6 +40,7 @@
     "افزودن کاربر جدید": "Add New User",
     "نام نمایشی پنل": "Panel Display Name",
     "در حال بررسی…": "Checking…",
+    "در حال بارگذاری...": "Loading...",
     "وضعیت: در حال بررسی…": "Status: Checking…",
     "راه‌اندازی کد دومرحله‌ای": "Set Up Two-Factor Authentication",
     "کد ۶ رقمی": "6-digit code",
