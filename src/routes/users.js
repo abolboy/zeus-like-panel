@@ -136,7 +136,7 @@ router.post("/:id/toggle", requireAdmin, async (req, res) => {
 
 
 router.get("/export", requireAdmin, (req, res) => {
-  const users = loadUsers().map(({ passwordHash, ...safe }) => safe);
+  const users = loadUsers().map(({ passwordHash, subToken, ...safe }) => safe);
   res.setHeader("Content-Disposition", 'attachment; filename="zeus-users-' + Date.now() + '.json"');
   res.json({ exportedAt: new Date().toISOString(), users });
 });
@@ -208,8 +208,8 @@ router.post("/bulk", requireAdmin, (req, res) => {
   usernames.forEach(function (name) {
     const u = users.find(x => x.username === name);
     if (!u) return;
-    if (action === "activate") { u.active = true; changed++; }
-    else if (action === "deactivate") { u.active = false; changed++; }
+    if (action === "activate") { u.active = true; u.authVersion = Number(u.authVersion || 0) + 1; changed++; }
+    else if (action === "deactivate") { u.active = false; u.authVersion = Number(u.authVersion || 0) + 1; changed++; }
     else if (action === "delete") { users.splice(users.indexOf(u), 1); changed++; }
   });
   saveUsers(users);
