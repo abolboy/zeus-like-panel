@@ -38,7 +38,7 @@ function createApp() {
   app.use(securityHeaders);
   app.use(requestLogger);
   app.use((req, res, next) => { res.setHeader("Cache-Control", "no-store"); next(); });
-  app.use(express.json());
+  app.use(express.json({ limit: "100kb", inflate: false }));
   app.use("/assets", express.static(config.publicDir));
 
   app.use(
@@ -162,7 +162,9 @@ function createApp() {
   app.use((err, req, res, next) => {
     console.error("خطای غیرمنتظره:", err);
     if (res.headersSent) return next(err);
-    res.status(500).json({ error: "خطای غیرمنتظره‌ی سرور. لطفاً دوباره تلاش کنید." });
+    const status = Number.isInteger(err?.status) ? err.status : 500;
+    const message = status === 413 ? "حجم درخواست بیش از حد مجاز است" : "خطای غیرمنتظره‌ی سرور. لطفاً دوباره تلاش کنید.";
+    res.status(status).json({ error: message });
   });
 
   return app;
