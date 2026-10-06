@@ -172,7 +172,7 @@
         fetch("/api/tickets", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text })
+          body: JSON.stringify({ text: text })
         }).then(function (r) { return r.json(); })
           .then(function (d) {
             if (d.ok) {
