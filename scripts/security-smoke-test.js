@@ -50,6 +50,22 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     tampered[0].event = "tampered";
     assert.throws(() => verifyLogs(tampered), /integrity check failed/);
 
+    const usersSource = fs.readFileSync(path.join(config.rootDir, "src", "routes", "users.js"), "utf8");
+    const backupSource = fs.readFileSync(path.join(config.rootDir, "src", "routes", "backup.js"), "utf8");
+    const plansSource = fs.readFileSync(path.join(config.rootDir, "src", "routes", "plans.js"), "utf8");
+    const subSource = fs.readFileSync(path.join(config.rootDir, "src", "routes", "subscription.js"), "utf8");
+    const appSource = fs.readFileSync(path.join(config.rootDir, "src", "app.js"), "utf8");
+    const loggerSource = fs.readFileSync(path.join(config.rootDir, "src", "middleware", "request-logger.js"), "utf8");
+
+    assert.match(usersSource, /user\.authVersion = Number\(user\.authVersion \|\| 0\) \+ 1;/);
+    assert.match(usersSource, /\{ passwordHash, subToken, \.\.\.safe \}/);
+    assert.match(backupSource, /\{ passwordHash, subToken, \.\.\.safe \}/);
+    assert.match(plansSource, /Number\.isFinite\(traffic\)/);
+    assert.match(subSource, /safeEqualText\(user\.subToken/);
+    assert.match(subSource, /Cache-Control.*no-store/);
+    assert.match(appSource, /express\.json\(\{ limit: "100kb", inflate: false \}\)/);
+    assert.match(loggerSource, /url: req\.path/);
+
     const createApp = require("../src/app");
     const app = createApp();
     const server = await new Promise((resolve) => {
