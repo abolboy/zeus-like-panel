@@ -17,7 +17,7 @@ function getTicketText(body) {
   const value = typeof body === "string"
     ? body
     : body && (body.text ?? body.message ?? body.content);
-  return String(value ?? "").replace(/[\\u200B-\\u200D\\uFEFF]/g, "").trim();
+  return String(value ?? "").replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
 }
 function tgNotify(text) {
   const token = process.env.TG_BOT_TOKEN, admin = process.env.TG_ADMIN_ID;
