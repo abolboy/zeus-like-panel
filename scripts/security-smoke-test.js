@@ -1,6 +1,7 @@
 const assert = require("assert");
 const { spawnSync } = require("child_process");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 
 process.env.NODE_ENV = "test";
@@ -8,6 +9,9 @@ process.env.SESSION_SECRET = "ci-test-session-secret";
 process.env.TRUST_PROXY = "false";
 
 const config = require("../src/config");
+const originalRootDir = config.rootDir;
+const auditTestRoot = fs.mkdtempSync(path.join(os.tmpdir(), "zeus-security-smoke-"));
+config.rootDir = auditTestRoot;
 fs.mkdirSync(path.join(config.rootDir, "data"), { recursive: true });
 
 const { loginGuard, registerFailure, registerSuccess } = require("../src/middleware/rate-limit");
@@ -50,6 +54,7 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     const tampered = JSON.parse(JSON.stringify(logs));
     tampered[0].event = "tampered";
     assert.throws(() => verifyLogs(tampered), /integrity check failed/);
+    config.rootDir = originalRootDir;
 
     const proxyNumeric = spawnSync(process.execPath, ["-e", "const c=require('./src/config'); process.stdout.write(String(c.trustProxy))"], {
       cwd: config.rootDir,
@@ -76,8 +81,8 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     const settingsSource = fs.readFileSync(path.join(config.rootDir, "src", "routes", "settings.js"), "utf8");
 
     assert.match(usersSource, /user\.authVersion = Number\(user\.authVersion \|\| 0\) \+ 1;/);
-    assert.match(usersSource, /\{ passwordHash, subToken, \.\.\.safe \}/);
-    assert.match(backupSource, /\{ passwordHash, subToken, \.\.\.safe \}/);
+    assert.match(usersSource, /\{ passwordHash, subToken, _renewalAppliedIds, \.\.\.safe \}/);
+    assert.match(backupSource, /\{ passwordHash, subToken, _renewalAppliedIds, \.\.\.safe \}/);
     assert.match(plansSource, /Number\.isFinite\(traffic\)/);
     assert.match(subSource, /safeEqualText\(user\.subToken/);
     assert.match(subSource, /Cache-Control.*no-store/);
@@ -120,9 +125,11 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     process.exit(0);
   } finally {
     Date.now = originalNow;
+    config.rootDir = originalRootDir;
+    fs.rmSync(auditTestRoot, { recursive: true, force: true });
     void now;
   }
-})().catch((err) => {
+})().then(() => process.exit(0)).catch((err) => {
   console.error(err);
   process.exit(1);
 });
