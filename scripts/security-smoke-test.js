@@ -122,7 +122,6 @@ const { logEvent, loadLogs, verifyLogs } = require("../src/utils/audit");
     }
 
     console.log("SECURITY_SMOKE_OK");
-    process.exit(0);
   } finally {
     Date.now = originalNow;
     config.rootDir = originalRootDir;
