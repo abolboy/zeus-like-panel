@@ -10,7 +10,7 @@ router.get("/", requireAdmin, (req, res) => {
   const payload = {
     exportedAt: new Date().toISOString(),
     settings: loadSettings(),
-    users: loadUsers().map(({ passwordHash, subToken, ...safe }) => safe),
+    users: loadUsers().map(({ passwordHash, subToken, _renewalAppliedIds, ...safe }) => safe),
     servers: loadServers().map(({ agentTokenHash, agentTokenCreatedAt, ...safe }) => safe),
   };
   res.setHeader("Content-Disposition", `attachment; filename="zeus-backup-${Date.now()}.json"`);

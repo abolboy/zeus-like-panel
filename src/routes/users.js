@@ -10,7 +10,7 @@ const { requireAdmin } = require("../middleware/auth");
 const { logEvent } = require("../utils/audit");
 
 router.get("/", requireAdmin, (req, res) => {
-  const users = loadUsers().map(({ passwordHash, subToken, ...safe }) => safe);
+  const users = loadUsers().map(({ passwordHash, subToken, _renewalAppliedIds, ...safe }) => safe);
   res.json(users);
 });
 
@@ -136,7 +136,7 @@ router.post("/:id/toggle", requireAdmin, async (req, res) => {
 
 
 router.get("/export", requireAdmin, (req, res) => {
-  const users = loadUsers().map(({ passwordHash, subToken, ...safe }) => safe);
+  const users = loadUsers().map(({ passwordHash, subToken, _renewalAppliedIds, ...safe }) => safe);
   res.setHeader("Content-Disposition", 'attachment; filename="zeus-users-' + Date.now() + '.json"');
   res.json({ exportedAt: new Date().toISOString(), users });
 });
@@ -173,7 +173,7 @@ router.post("/import", requireAdmin, async (req, res) => {
   res.json({ ok: true, added, skipped });
 });
 
-router.post("/sms/phone", requireAdmin, (req, res) => {
+router.post("/sms/phone", requireAdmin, async (req, res) => {
   const body = req.body || {};
   const username = String(body.username || "");
   const phone = String(body.phone || "").trim();
@@ -185,7 +185,12 @@ router.post("/sms/phone", requireAdmin, (req, res) => {
   if (!u) return res.status(404).json({ error: "کاربر یافت نشد" });
   const wasEmpty = !u.phone;
   u.phone = phone;
-  saveUsers(users);
+  try {
+    await saveUsers(users);
+  } catch (err) {
+    console.error("user phone save error:", err);
+    return res.status(500).json({ error: "خطا در ذخیره اطلاعات کاربر" });
+  }
   logEvent("user.phone_updated", req.session.admin, { username: u.username, hasPhone: Boolean(phone) }, req);
   let welcomeSent = false;
   if (wasEmpty && phone) {
@@ -199,7 +204,7 @@ router.post("/sms/phone", requireAdmin, (req, res) => {
 });
 
 
-router.post("/bulk", requireAdmin, (req, res) => {
+router.post("/bulk", requireAdmin, async (req, res) => {
   const action = String((req.body && req.body.action) || "").trim();
   const usernames = Array.isArray(req.body && req.body.usernames) ? req.body.usernames : [];
   if (!action || !usernames.length) return res.status(400).json({ error: "action و usernames لازم است" });
@@ -212,7 +217,12 @@ router.post("/bulk", requireAdmin, (req, res) => {
     else if (action === "deactivate") { u.active = false; u.authVersion = Number(u.authVersion || 0) + 1; changed++; }
     else if (action === "delete") { users.splice(users.indexOf(u), 1); changed++; }
   });
-  saveUsers(users);
+  try {
+    await saveUsers(users);
+  } catch (err) {
+    console.error("user bulk save error:", err);
+    return res.status(500).json({ error: "خطا در ذخیره اطلاعات کاربران" });
+  }
   logEvent("user.bulk_mutation", req.session.admin, { action, changed }, req);
   res.json({ ok: true, changed: changed });
 });
