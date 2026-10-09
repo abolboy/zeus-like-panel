@@ -4,7 +4,7 @@ const path = require("path");
 let writeQueue = Promise.resolve();
 
 function atomicWrite(file, data) {
-  writeQueue = writeQueue.then(
+  const write = writeQueue.catch(() => {}).then(
     () =>
       new Promise((resolve, reject) => {
         const tmp = file + ".tmp";
@@ -14,7 +14,9 @@ function atomicWrite(file, data) {
         });
       })
   );
-  return writeQueue;
+
+  writeQueue = write;
+  return write;
 }
 
 function loadJSON(file, fallback) {

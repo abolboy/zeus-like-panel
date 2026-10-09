@@ -1205,62 +1205,114 @@
   async function loadRenewalRequests() {
     try {
       const res = await fetch("/api/renewal-requests");
-      if (res.status === 401) return (window.location.href = "/login");
+      if (res.status === 401) {
+        window.location.href = "/login";
+        return;
+      }
+      if (!res.ok) throw new Error("HTTP " + res.status);
+
       const requests = await res.json();
+      if (!Array.isArray(requests)) {
+        throw new Error("ساختار فهرست درخواست‌ها نامعتبر است");
+      }
+
       updateRenewalBadge(requests.length);
 
       const list = document.getElementById("renewalList");
       const empty = document.getElementById("renewalEmpty");
-      list.innerHTML = "";
+      if (!list || !empty) return;
+
+      list.replaceChildren();
       empty.style.display = requests.length ? "none" : "block";
 
-      requests.forEach(u => {
-        const status = computeUserStatus(u.active, u.expiry);
-        const requestedAt = new Date(u.renewalRequested).toLocaleDateString("fa-IR");
+      requests.forEach((request) => {
         const tr = document.createElement("tr");
+        const requestedDate = request.createdAt
+          ? new Date(request.createdAt)
+          : null;
+        const requestedAt = requestedDate && !Number.isNaN(requestedDate.getTime())
+          ? requestedDate.toLocaleString("fa-IR")
+          : "—";
+
         tr.innerHTML = `
-          <td><strong>${escapeHtml(u.username)}</strong></td>
-          <td><span class="badge ${status.cls}">${status.label}</span></td>
+          <td><strong>${escapeHtml(request.username || "—")}</strong></td>
+          <td>${escapeHtml(request.planName || "—")} (${escapeHtml(String(request.planDays ?? "—"))} روز / ${escapeHtml(String(request.planTraffic ?? "—"))} GB)</td>
           <td>${escapeHtml(requestedAt)}</td>
           <td>
             <div class="row-actions">
-              <button class="btn btn-gold" style="padding:6px 10px; font-size:12px" data-action="approve" data-id="${escapeHtml(String(u.id))}">تأیید (۳۰ روز)</button>
-              <button class="btn btn-ghost" style="padding:6px 10px; font-size:12px" data-action="reject" data-id="${escapeHtml(String(u.id))}">رد</button>
+              <button class="btn btn-gold" style="padding:6px 10px;font-size:12px"
+                data-action="approve" data-id="${escapeHtml(String(request.id || ""))}">تأیید تمدید</button>
+              <button class="btn btn-ghost" style="padding:6px 10px;font-size:12px"
+                data-action="reject" data-id="${escapeHtml(String(request.id || ""))}">رد</button>
             </div>
           </td>
         `;
         list.appendChild(tr);
       });
-    } catch { toast("خطا در دریافت درخواست‌های تمدید", "error"); }
+    } catch (err) {
+      console.error("loadRenewalRequests error:", err);
+      toast("خطا در دریافت درخواست‌های تمدید", "error");
+    }
   }
 
   function updateRenewalBadge(count) {
     const badge = document.getElementById("renewalBadge");
-    if (count > 0) { badge.textContent = count; badge.style.display = "flex"; }
-    else { badge.style.display = "none"; }
+    if (!badge) return;
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = "flex";
+    } else {
+      badge.style.display = "none";
+    }
   }
 
   document.getElementById("renewalList").addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-action]");
-    if (!btn) return;
+    if (!btn || btn.disabled) return;
+
     const id = btn.dataset.id;
-    if (btn.dataset.action === "approve") {
-      const daysInput = prompt("تمدید به مدت چند روز؟", "30");
-      if (daysInput === null) return;
-      const days = Number(daysInput) || 30;
-      const res = await fetch("/api/renewal-requests/" + id + "/approve", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ days })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok) { toast("تمدید تأیید شد — انقضای جدید: " + data.expiry); loadRenewalRequests(); loadData(); }
-      else toast(data.error || "خطا در تأیید تمدید", "error");
+    if (!id) {
+      toast("شناسه درخواست معتبر نیست", "error");
+      return;
     }
-    if (btn.dataset.action === "reject") {
-      confirmAction("رد درخواست تمدید؟", "این درخواست بدون تمدید حذف می‌شود.", async () => {
-        const res = await fetch("/api/renewal-requests/" + id + "/reject", { method: "POST" });
-        if (res.ok) { toast("درخواست رد شد"); loadRenewalRequests(); }
-        else toast("خطا در رد درخواست", "error");
-      });
+
+    const action = btn.dataset.action;
+    const endpoint = "/api/renewal/" + encodeURIComponent(id) + "/" +
+      (action === "approve" ? "approve" : action === "reject" ? "reject" : "");
+
+    if (action !== "approve" && action !== "reject") return;
+
+    const perform = async () => {
+      btn.disabled = true;
+      try {
+        const res = await fetch(endpoint, { method: "POST" });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.ok) {
+          toast(data.error || "عملیات تمدید ناموفق بود", "error");
+          return;
+        }
+
+        if (action === "approve") {
+          toast("تمدید تأیید شد — انقضای جدید: " + (data.newExpiry || "ثبت شد"));
+          await loadRenewalRequests();
+          await loadData();
+        } else {
+          toast("درخواست تمدید رد شد");
+          await loadRenewalRequests();
+        }
+      } catch (err) {
+        console.error("renewal action error:", err);
+        toast("ارتباط با سرور ناموفق بود", "error");
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    if (action === "reject") {
+      confirmAction("رد درخواست تمدید؟", "این درخواست بدون تمدید رد می‌شود.", perform);
+    } else {
+      await perform();
     }
   });
 
