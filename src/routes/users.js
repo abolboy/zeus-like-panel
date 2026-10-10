@@ -208,15 +208,21 @@ router.post("/bulk", requireAdmin, async (req, res) => {
   const action = String((req.body && req.body.action) || "").trim();
   const usernames = Array.isArray(req.body && req.body.usernames) ? req.body.usernames : [];
   if (!action || !usernames.length) return res.status(400).json({ error: "action و usernames لازم است" });
-  const users = loadUsers();
+  let users = loadUsers();
   let changed = 0;
-  usernames.forEach(function (name) {
-    const u = users.find(x => x.username === name);
-    if (!u) return;
-    if (action === "activate") { u.active = true; u.authVersion = Number(u.authVersion || 0) + 1; changed++; }
-    else if (action === "deactivate") { u.active = false; u.authVersion = Number(u.authVersion || 0) + 1; changed++; }
-    else if (action === "delete") { users.splice(users.indexOf(u), 1); changed++; }
-  });
+  if (action === "delete") {
+    const toDelete = new Set(usernames.map(String));
+    const before = users.length;
+    users = users.filter((u) => !toDelete.has(String(u.username)));
+    changed = before - users.length;
+  } else {
+    usernames.forEach(function (name) {
+      const u = users.find(x => x.username === name);
+      if (!u) return;
+      if (action === "activate") { u.active = true; u.authVersion = Number(u.authVersion || 0) + 1; changed++; }
+      else if (action === "deactivate") { u.active = false; u.authVersion = Number(u.authVersion || 0) + 1; changed++; }
+    });
+  }
   try {
     await saveUsers(users);
   } catch (err) {

@@ -166,7 +166,6 @@ router.post("/:id/approve", requireAdmin, async (req, res) => {
     await saveUsers(users);
 
     r.status = "approved";
-    try { sendNotification(u.username, "تأیید تمدید", "درخواست تمدید شما تأیید شد. اشتراک شما به‌روز شد."); } catch(e){}
     r.approvedAt = now();
     save(list);
     try { notifyUser(u.username, "اشتراک شما تمدید شد! انقضا: " + expStr + " | حجم: " + u.traffic + " GB"); } catch (e) {}

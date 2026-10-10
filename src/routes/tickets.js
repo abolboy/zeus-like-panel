@@ -7,7 +7,16 @@ const config = require("../config");
 
 const file = path.join(config.rootDir, "data", "tickets.json");
 function load() { try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch (e) { return []; } }
-function save(list) { fs.writeFileSync(file, JSON.stringify(list, null, 2)); }
+function save(list) {
+  if (!Array.isArray(list)) {
+    throw new Error("فهرست تیکت‌ها معتبر نیست");
+  }
+  const dir = path.dirname(file);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const tmp = file + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(list, null, 2), "utf8");
+  fs.renameSync(tmp, file);
+}
 function now() { return new Date().toISOString(); }
 
 // Accept the canonical `text` field and common aliases so the ticket API
