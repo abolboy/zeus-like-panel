@@ -7,6 +7,17 @@
   }
   function panelFor(tabId) { return document.getElementById(tabId); }
 
+  function scrollToTop() {
+    try {
+      var main = document.querySelector(".main");
+      if (main && typeof main.scrollTo === "function") main.scrollTo(0, 0);
+      if (main) main.scrollTop = 0;
+      window.scrollTo(0, 0);
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    } catch (e) {}
+  }
+
   function fade(el) {
     if (!el) return;
     el.style.animation = "none";
@@ -29,6 +40,7 @@
     if (push) history.pushState({ tab: tabId }, "", "#" + tabId);
     else history.replaceState({ tab: tabId }, "", "#" + tabId);
     fade(panelFor(tabId));
+    scrollToTop();
   }
 
   function currentFromHash() { return (location.hash || "").replace("#", ""); }
@@ -58,6 +70,7 @@
       setTimeout(function () {
         history.pushState({ tab: tabId }, "", "#" + tabId);
         fade(panelFor(tabId));
+        scrollToTop();
       }, 0);
     });
 
@@ -67,7 +80,7 @@
       if (!tabId) return;
       var cur = document.querySelector('[data-tab].active');
       if (!cur || cur.getAttribute("data-tab") !== tabId) activate(tabId, false);
-      else fade(panelFor(tabId));
+      else { fade(panelFor(tabId)); scrollToTop(); }
     });
   }
 
