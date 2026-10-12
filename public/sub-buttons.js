@@ -26,6 +26,7 @@
   }
 
   function getUsername() {
+    if (window._userData && window._userData.username) return window._userData.username;
     var h1 = document.querySelector(".ud-head h1");
     return h1 ? h1.textContent.trim() : "";
   }
@@ -39,7 +40,7 @@
     var username = getUsername();
 
     if (action === "copy") {
-      if (link) copyText(link);
+      if (link && window._userData && window._userData.subToken) copyText(link);
       else toast("لینکی نیست");
     } else if (action === "qr") {
       if (!username) { toast("نام کاربر پیدا نشد"); return; }

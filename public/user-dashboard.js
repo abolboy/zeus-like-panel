@@ -7,6 +7,16 @@
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
+  function remainingDays(expiry) {
+    if (!expiry) return null;
+    var parts = String(expiry).trim().split("-").map(Number);
+    if (parts.length !== 3 || !parts.every(Number.isInteger)) return null;
+    var day = parts[0], month = parts[1], year = parts[2];
+    var end = new Date(year, month - 1, day, 23, 59, 59, 999);
+    if (end.getFullYear() !== year || end.getMonth() !== month - 1 || end.getDate() !== day) return null;
+    return Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86400000));
+  }
+
   // تابع اصلی رندر که هر ۴ صفحه را می‌سازد
   function render(user) {
     if (!user) return;
@@ -15,7 +25,11 @@
     var trafficUsed = Number(user.trafficUsed || 0);
     var trafficRemaining = Math.max(0, trafficTotal - trafficUsed);
     var percent = trafficTotal > 0 ? Math.min(100, (trafficUsed / trafficTotal) * 100) : 0;
-    var subLink = user.subLink || 'در حال ساخت...';
+    var subLink = user.subscriptionUrl
+      ? user.subscriptionUrl
+      : "هنوز لینک ساخته نشده است";
+    var daysLeft = remainingDays(user.expiry);
+    var configs = Array.isArray(user.configs) ? user.configs : [];
 
     var h = '';
 
@@ -39,7 +53,7 @@
     // کارت زمان باقی‌مانده
     h += '<div style="background:rgba(15,20,35,0.6);backdrop-filter:blur(20px);border:1px solid rgba(242,183,5,0.15);border-radius:16px;padding:12px;margin-bottom:6px;box-shadow:0 10px 40px rgba(0,0,0,0.3)">';
     h += '<h3 style="margin:0 0 8px;font-size:16px;color:#eef1f8;font-weight:700">⏳ زمان باقی‌مانده</h3>';
-    h += '<div style="font-size:40px;font-weight:800;color:#35d68f;text-align:center">' + esc(user.daysLeft || '30') + ' <span style="font-size:18px;color:#8892ab">روز</span></div>';
+    h += '<div style="font-size:40px;font-weight:800;color:#35d68f;text-align:center">' + esc(daysLeft == null ? '—' : daysLeft) + ' <span style="font-size:18px;color:#8892ab">روز</span></div>';
     h += '<div style="text-align:center;color:#8892ab;font-size:13px;margin-top:8px">انقضا: ' + esc(user.expiry || '—') + '</div>';
     h += '</div>';
 
@@ -56,17 +70,19 @@
     h += '<h3 style="margin:0 0 8px;font-size:16px;color:#eef1f8;font-weight:700">🔌 کانفیگ‌های اتصال</h3>';
     h += '<div style="background:rgba(10,14,26,0.6);padding:12px;border-radius:10px;border:1px solid #212942;margin-bottom:10px">';
     h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="color:#35d68f;font-size:14px">VLESS • REALITY</b><button id="btnCopyConfig" style="background:#f2b705;color:#1a1204;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer">📋 کپی</button></div>';
-    h += '<div style="color:#8892ab;font-size:11px;word-break:break-all;font-family:monospace">vless://...(کانفیگ موجود)</div>';
+    h += '<div id="udConfigLinks" style="color:#8892ab;font-size:11px;word-break:break-all;font-family:monospace">' + (configs.length
+      ? configs.map(function (c) { return '<div style="padding:4px 0">' + esc(c.link) + '</div>'; }).join("")
+      : 'سرور فعالی برای این اشتراک وجود ندارد') + '</div>';
     h += '</div></div>';
 
     // لینک سابسکریپشن
     h += '<div style="background:rgba(15,20,35,0.6);backdrop-filter:blur(20px);border:1px solid rgba(242,183,5,0.15);border-radius:16px;padding:12px;margin-bottom:6px;box-shadow:0 10px 40px rgba(0,0,0,0.3)">';
     h += '<h3 style="margin:0 0 8px;font-size:16px;color:#eef1f8;font-weight:700">🔗 لینک سابسکریپشن</h3>';
-    h += '<div style="background:rgba(10,14,26,0.6);padding:12px;border-radius:10px;border:1px solid #212942;margin-bottom:12px;word-break:break-all;font-size:12px;color:#8892ab;font-family:monospace;min-height:50px">' + subLink + '</div>';
+    h += '<div id="udSubLink" style="background:rgba(10,14,26,0.6);padding:12px;border-radius:10px;border:1px solid #212942;margin-bottom:12px;word-break:break-all;font-size:12px;color:#8892ab;font-family:monospace;min-height:50px">' + esc(subLink) + '</div>';
     h += '<div style="display:flex;gap:8px">';
     h += '<button data-sub-action="copy" style="flex:1;background:#131829;border:1px solid #212942;color:#eef1f8;padding:12px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px">📋 کپی</button>';
     h += '<button data-sub-action="qr" style="flex:1;background:#131829;border:1px solid #212942;color:#eef1f8;padding:12px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px">📱 QR</button>';
-    h += '<button data-sub-action="rotate" style="flex:1;background:#131829;border:1px solid #212942;color:#eef1f8;padding:12px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px">🔄 تغییر توکن</button>';
+    h += '<button data-sub-action="' + (user.subToken ? 'rotate' : 'make') + '" style="flex:1;background:#131829;border:1px solid #212942;color:#eef1f8;padding:12px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px">' + (user.subToken ? '🔄 تغییر توکن' : '🔗 ساخت لینک') + '</button>';
     h += '</div></div>';
 
     // دکمه تغییر رمز
@@ -108,7 +124,7 @@
     h += '<div style="background:rgba(10,14,26,0.5);padding:12px;border-radius:10px"><div style="color:#8892ab;font-size:12px">حجم کل</div><div style="color:#eef1f8;font-weight:700;margin-top:2px;font-size:13px">' + trafficTotal + ' GB</div></div>';
     h += '<div style="background:rgba(10,14,26,0.5);padding:12px;border-radius:10px"><div style="color:#8892ab;font-size:12px">مصرف شده</div><div style="color:#f2b705;font-weight:700;margin-top:2px;font-size:13px">' + trafficUsed + ' GB</div></div>';
     h += '<div style="background:rgba(10,14,26,0.5);padding:12px;border-radius:10px"><div style="color:#8892ab;font-size:12px">باقی‌مانده</div><div style="color:#35d68f;font-weight:700;margin-top:2px;font-size:13px">' + trafficRemaining + ' GB</div></div>';
-    h += '<div style="background:rgba(10,14,26,0.5);padding:12px;border-radius:10px"><div style="color:#8892ab;font-size:12px">روزهای باقی‌مانده</div><div style="color:#f2b705;font-weight:700;margin-top:2px;font-size:13px">' + esc(user.daysLeft || '30') + ' روز</div></div>';
+    h += '<div style="background:rgba(10,14,26,0.5);padding:12px;border-radius:10px"><div style="color:#8892ab;font-size:12px">روزهای باقی‌مانده</div><div style="color:#f2b705;font-weight:700;margin-top:2px;font-size:13px">' + esc(daysLeft == null ? '—' : daysLeft) + ' روز</div></div>';
     h += '</div></div>';
 
     // دکمه خروج
@@ -186,28 +202,23 @@
       });
     }
 
-    // دکمه‌های سابسکریپشن
-    document.querySelectorAll("[data-sub-action]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var action = btn.getAttribute("data-sub-action");
-        if (action === "copy") {
-          var link = btn.parentElement.previousElementSibling.textContent.trim();
-          navigator.clipboard.writeText(link).then(function () { alert("✅ لینک کپی شد"); });
-        } else if (action === "qr") {
-          alert("📱 QR Code: " + (window._userData ? window._userData.subLink : ""));
-        } else if (action === "rotate") {
-          if (confirm("آیا از تغییر توکن اطمینان دارید؟")) {
-            fetch("/api/sub/token/" + encodeURIComponent(window._userData.username), { method: "POST" })
-              .then(function (r) { return r.json(); })
-              .then(function (d) {
-                if (d.ok) {
-                  alert("✅ توکن تغییر کرد. لینک جدید: " + d.newLink);
-                  load();
-                }
-              });
-          }
-        }
-      });
+    var copyConfigBtn = document.getElementById("btnCopyConfig");
+    if (copyConfigBtn) copyConfigBtn.addEventListener("click", function () {
+      var links = Array.isArray(window._userData && window._userData.configs)
+        ? window._userData.configs.map(function (c) { return c.link; }).filter(Boolean)
+        : [];
+      if (!links.length) return alert("کانفیگی برای کپی وجود ندارد");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(links.join("\n")).then(function () { alert("✅ کانفیگ‌ها کپی شدند"); });
+      } else {
+        var input = document.createElement("textarea");
+        input.value = links.join("\n");
+        document.body.appendChild(input);
+        input.select();
+        try { document.execCommand("copy"); alert("✅ کانفیگ‌ها کپی شدند"); }
+        catch (e) { alert("❌ خطا در کپی کانفیگ‌ها"); }
+        input.remove();
+      }
     });
   }
 

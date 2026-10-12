@@ -39,12 +39,16 @@ router.get("/:username", requireUserOrAdmin, (req, res) => {
   if (req.session.userId && isExpired(user.expiry)) {
     return res.status(403).json({ error: "اشتراک شما منقضی شده است. برای تمدید با مدیر پنل تماس بگیرید." });
   }
+  const publicBaseUrl = String(config.publicBaseUrl || req.protocol + "://" + req.get("host")).replace(/\/+$/, "");
   res.json({
     username: user.username,
     active: user.active,
     trafficTotal: Math.round((Number(user.traffic) || 0) * 100) / 100,
     trafficUsed: Math.round((Number(user.trafficUsed) || 0) * 100) / 100,
     expiry: user.expiry,
+    subscriptionUrl: user.subToken
+      ? publicBaseUrl + "/api/sub/b64/" + encodeURIComponent(user.username) + "?token=" + encodeURIComponent(user.subToken)
+      : null,
     configs: buildConfigs(user),
     createdAt: user.createdAt || null,
     subToken: user.subToken || null,
