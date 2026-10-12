@@ -122,7 +122,7 @@ router.post("/user-login", loginGuard("user"), async (req, res) => {
         uu.loginHistory = Array.isArray(uu.loginHistory) ? uu.loginHistory : [];
         uu.loginHistory.push({ time: uu.lastLogin, ip: String(req.ip || "-") });
         uu.loginHistory = uu.loginHistory.slice(-10);
-        saveUsers(usList);
+        saveUsers(usList).catch(function () {});
       }
     } catch (e) {}
     req.session.username = user.username;

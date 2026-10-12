@@ -110,7 +110,7 @@ function createApp() {
     }
     next();
   });
-  app.use("/api", renewalRouter);
+  // renewal only via /api/renewal (duplicate /api mount removed)
   app.use("/api/sub", subscriptionRouter);
   app.use("/api/reports", reportsRouter);
   app.use("/api/backup", backupRouter);
@@ -141,7 +141,7 @@ function createApp() {
     try {
       const fs2 = require("fs");
       const path2 = require("path");
-      const uFile = path2.join(config.rootDir, "data", "users.json");
+      const uFile = path2.join(config.rootDir, "users.json");
       let users = [];
       try { users = JSON.parse(fs2.readFileSync(uFile, "utf8")); } catch (e) {}
       const labels = [], counts = [];
